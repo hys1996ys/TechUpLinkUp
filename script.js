@@ -28,6 +28,57 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   let choicesInstance, commModeInstance, learningStyleInstance;
 
+  // Sign Up Form Handling
+  if (signUpBtn && signUpModal && signUpClose) {
+    signUpBtn.addEventListener('click', () => signUpModal.classList.remove('hidden'));
+    signUpClose.addEventListener('click', () => signUpModal.classList.add('hidden'));
+
+    const signUpForm = document.getElementById('signupForm');
+    if (signUpForm) {
+      console.log('🧠 Binding sign up form...');
+      signUpForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: window.location.origin + '/profile.html',
+          },
+        });
+
+        if (error) return alert('Sign up error: ' + error.message);
+        alert('Check your email to confirm the sign-up!');
+        signUpModal.classList.add('hidden');
+      });
+    }
+  }
+
+  // Sign In Form Handling
+  if (signinBtn && signinModal && signinClose) {
+    signinBtn.addEventListener('click', () => signinModal.classList.remove('hidden'));
+    signinClose.addEventListener('click', () => signinModal.classList.add('hidden'));
+
+    const signInForm = document.getElementById('signinForm');
+    if (signInForm) {
+      console.log('🧠 Binding sign in form...');
+      signInForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('signin-email').value;
+        const password = document.getElementById('signin-password').value;
+
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) return alert('Sign-in failed: ' + error.message);
+
+        alert('Welcome back!');
+        signinModal.classList.add('hidden');
+        loadProfile(data.user.id);
+      });
+    }
+  }
+
   // Initialize Choices.js safely
   if (skillsSelect) {
     choicesInstance = new Choices(skillsSelect, {
@@ -40,12 +91,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (commModeSelect) {
     commModeInstance = new Choices(commModeSelect, {
       removeItemButton: true,
+      placeholderValue: 'Select your preferred communication mode(s)',
       shouldSort: false,
     });
     commModeInstance.disable();
   }
   if (learningStyleSelect) {
     learningStyleInstance = new Choices(learningStyleSelect, {
+      placeholderValue: 'Select your learning style as a mentor',
       removeItemButton: true,
       shouldSort: false,
     });

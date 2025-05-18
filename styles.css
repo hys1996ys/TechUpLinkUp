@@ -240,8 +240,8 @@ nav a {
 
 .profile-left {
   flex: 1;
-  min-width: 280px;
-  max-width: 320px;
+  min-width: 80px;
+  max-width: 420px;
 }
 
 .profile-right {
@@ -290,6 +290,19 @@ textarea.profile-input {
   margin-bottom: 1rem;
   border-radius: 0.5rem;
   box-sizing: border-box;
+}
+
+
+
+.choices__list--multiple .choices__item {
+  background-color: #e5e7eb;  /* light grey background for saved state */
+  color: #374151;              /* darker grey text */
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 0.3rem 0.75rem;
+  margin: 0.25rem;
+  border: none;
 }
 
 
