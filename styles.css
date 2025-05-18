@@ -209,3 +209,167 @@ nav a {
 
 
 /* End: Style Sign-Up */
+
+
+/* Style for profile.html */
+
+/* Profile Layout */
+.profile-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  padding: 3rem 2rem;
+  box-sizing: border-box;
+}
+
+.profile-left {
+  flex: 1;
+  min-width: 280px;
+  max-width: 320px;
+}
+
+.profile-right {
+  flex: 2;
+  min-width: 320px;
+}
+
+/* Profile Card */
+.profile-card {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.avatar-circle {
+  width: 60px;
+  height: 60px;
+  background-color: #0ea5e9;
+  color: white;
+  font-weight: 600;
+  font-size: 1.5rem;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Tags and Domains */
+.tag-group {
+  width: 100%;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.tag {
+  background-color: #e0f2fe;
+  color: #0f172a;
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 0.3rem 0.75rem;
+  border-radius: 9999px;
+}
+
+.domain {
+  background-color: #d1fae5;
+  color: #047857;
+}
+
+/* Full width button */
+.full-width {
+  width: 100%;
+  justify-content: center;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.tab {
+  padding: 0.75rem 1rem;
+  background: none;
+  border: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  color: #6b7280;
+  border-bottom: 3px solid transparent;
+}
+
+.tab.active {
+  color: #0f172a;
+  border-color: #0ea5e9;
+}
+
+/* Summary Box */
+.summary-box {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.summary-box h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.summary-box p {
+  margin: 0.5rem 0 2rem;
+  font-size: 0.95rem;
+  color: #475569;
+}
+
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.stat-card {
+  background-color: #f9fafb;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  flex: 1;
+  min-width: 180px;
+  text-align: left;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.stat-card h4 {
+  font-size: 0.95rem;
+  color: #0f172a;
+  margin-bottom: 0.5rem;
+}
+
+.stat-card .value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.stat-card .subtext {
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+
+/* End of Style for profile.html */
