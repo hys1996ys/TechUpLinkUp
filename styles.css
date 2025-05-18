@@ -64,6 +64,18 @@ nav a {
   margin: 0 0.5rem;
 }
 
+.hero-buttons {
+  margin-top: 1.5rem;
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.hero-buttons .btn {
+  font-size: 1rem;
+  padding: 0.6rem 1.2rem;
+}
+
 .section {
   padding: 4rem 2rem;
   text-align: center;
@@ -132,6 +144,10 @@ nav a {
 }
 
 /* Start: Style Sign-Up */
+
+.hidden {
+  display: none !important;
+}
 
 .modal {
   display: flex;
@@ -237,25 +253,70 @@ nav a {
 .profile-card {
   background-color: white;
   padding: 2rem;
-  border-radius: 0.75rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 1rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  margin-bottom: 2rem;
+}
+
+.profile-card label {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #0f172a;
+}
+
+
+.profile-input {
+  display: block;
+  width: 100%;
+  padding: 0.75rem;
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+textarea.profile-input {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.choices {
+  width: 100%;
+  max-width: 100%;
+  padding: 0.75rem !important;
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+  border-radius: 0.5rem;
+  box-sizing: border-box;
+}
+
+
+
+.profile-input:focus {
+  border-color: #007bff;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
+}
+
+.profile-card.editing {
+  border: 2px solid #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.15);
 }
 
 .avatar-circle {
-  width: 60px;
-  height: 60px;
-  background-color: #0ea5e9;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background-color: #007bff;
   color: white;
-  font-weight: 600;
-  font-size: 1.5rem;
-  border-radius: 9999px;
+  font-weight: bold;
+  font-size: 1.8rem;
   display: flex;
   align-items: center;
   justify-content: center;
+  margin: 0 auto 1rem;
 }
 
 /* Tags and Domains */
@@ -278,6 +339,17 @@ nav a {
   padding: 0.3rem 0.75rem;
   border-radius: 9999px;
 }
+
+/* Spacing below skills and before buttons */
+.tag-group {
+  margin-bottom: 1.5rem;
+}
+
+#editBtn,
+#saveBtn {
+  margin-top: 0.5rem;
+}
+
 
 .domain {
   background-color: #d1fae5;
@@ -369,6 +441,48 @@ nav a {
 .stat-card .subtext {
   font-size: 0.85rem;
   color: #6b7280;
+}
+
+.user-greeting {
+  margin-left: auto;
+  margin-right: 1rem;
+  font-weight: 500;
+  color: #333;
+}
+
+/* Tooltip for info icons */
+.info-icon {
+  margin-left: 0.5rem;
+  color: #0ea5e9;
+  cursor: pointer;
+  position: relative;
+  font-size: 1rem;
+}
+
+.info-icon:hover .tooltip {
+  visibility: visible;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.tooltip {
+  visibility: hidden;
+  opacity: 0;
+  position: absolute;
+  top: 1.5rem;
+  left: 0;
+  background-color: #f9fafb;
+  color: #0f172a;
+  padding: 1rem;
+  font-size: 0.85rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  width: 300px;
+  z-index: 10;
+  transition: all 0.2s ease-in-out;
+  transform: translateY(-5px);
+  white-space: normal;
+  line-height: 1.4;
 }
 
 

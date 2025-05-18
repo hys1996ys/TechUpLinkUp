@@ -25,66 +25,104 @@
       <a href="mentorship.html">Mentorship</a>
       <a href="discover.html">Discover</a>
       <a href="community.html">Community</a>
-      <button class="btn" id="openSignin">Sign In</button>
-      <button class="btn btn-primary" id="openSignup">Sign Up</button>
+      <span id="userGreeting" class="user-greeting hidden">Hi, <strong id="userName">User</strong></span>
+
+<button class="btn btn-secondary hidden" id="logoutBtn">Log Out</button>
+
     </nav>
   </header>
 
   <main class="profile-container">
-    <div class="profile-left">
-      <div class="profile-card" id="profileCard">
-        <div class="avatar-circle" id="avatarCircle">A</div>
+  <div class="profile-left">
+    <div class="profile-card" id="profileCard">
+      <div class="avatar-circle" id="avatarCircle">A</div>
 
-        <input type="text" id="name" class="profile-input" placeholder="Your name" disabled />
-        <input type="text" id="designation" class="profile-input" placeholder="Job title" disabled />
-        <textarea id="description" class="profile-input" placeholder="Short description" disabled></textarea>
+      <label for="name">Name</label>
+      <input type="text" id="name" class="profile-input" placeholder="Your name" disabled />
 
-        <div class="tag-group">
-          <strong>Skills</strong>
-          <select id="skills" class="profile-input" multiple disabled>
-            <option value="Leadership">Leadership</option>
-            <option value="Strategic Planning">Strategic Planning</option>
-            <option value="Team Management">Team Management</option>
-            <option value="Communication">Communication</option>
-            <option value="Project Management">Project Management</option>
-          </select>
-        </div>
+      <label for="designation">Job Title</label>
+      <input type="text" id="designation" class="profile-input" placeholder="Job title" disabled />
 
-        <button class="btn btn-primary full-width" id="editBtn"><i class="fa-solid fa-pen"></i> Edit Profile</button>
-        <button class="btn btn-primary full-width hidden" id="saveBtn"><i class="fa-solid fa-save"></i> Save Changes</button>
+      <label for="description">Description</label>
+      <textarea id="description" class="profile-input" placeholder="Short description" disabled></textarea>
+
+      <div class="tag-group">
+        <strong>Skills</strong>
+        <select id="skills" class="profile-input" multiple disabled>
+          <option value="Leadership">Leadership</option>
+          <option value="Strategic Planning">Strategic Planning</option>
+          <option value="Team Management">Team Management</option>
+          <option value="Communication">Communication</option>
+          <option value="Project Management">Project Management</option>
+        </select>
       </div>
+
+      <div class="tag-group">
+        <strong>Communication Mode</strong>
+        <select id="commMode" class="profile-input" multiple disabled>
+          <option value="Virtual">Virtual</option>
+          <option value="In-Person">In-Person</option>
+          <option value="Chat/Messaging">Chat/Messaging</option>
+          <option value="Flexible">Flexible</option>
+        </select>
+      </div>
+
+      <div class="tag-group">
+        <label for="learningStyle">
+  <strong>Learning Style</strong>
+  <span class="info-icon">
+    <i class="fa fa-info-circle"></i>
+    <div class="tooltip">
+      Directed: The mentor takes the lead, providing clear instructions and support.<br><br>
+      Co-Directed: Mentor leads but encourages dialogue and input.<br><br>
+      Consulting: Peer collaboration with joint problem-solving.<br><br>
+      Self-Directed: Mentee leads, mentor offers support if needed.
+    </div>
+  </span>
+</label>
+        <select id="learningStyle" class="profile-input" multiple disabled>
+          <option value="Directed">Directed</option>
+          <option value="Co-directed">Co-directed</option>
+          <option value="Consulting">Consulting</option>
+          <option value="Self-directed">Self-directed</option>
+        </select>
+      </div>
+
+      <button class="btn btn-primary full-width" id="editBtn"><i class="fa-solid fa-pen"></i> Edit Profile</button>
+      <button class="btn btn-primary full-width hidden" id="saveBtn"><i class="fa-solid fa-save"></i> Save Changes</button>
+    </div>
+  </div>
+
+  <div class="profile-right">
+    <div class="tabs">
+      <button class="tab active">Overview</button>
+      <button class="tab">Coffee Talks</button>
     </div>
 
-    <div class="profile-right">
-      <div class="tabs">
-        <button class="tab active">Overview</button>
-        <button class="tab">Coffee Talks</button>
-        
-      </div>
-
-      <div class="summary-box">
-        <h3>Profile Summary</h3>
-        <p>Your profile completeness and current stats</p>
-        <div class="stats">
-          <div class="stat-card">
-            <h4>Mentorship Sessions</h4>
-            <p class="value">12</p>
-            <p class="subtext">+2 from last month</p>
-          </div>
-          <div class="stat-card">
-            <h4>Average Rating</h4>
-            <p class="value">4.8/5</p>
-            <p class="subtext">Based on 8 reviews</p>
-          </div>
-          <div class="stat-card">
-            <h4>Community Posts</h4>
-            <p class="value">5</p>
-            <p class="subtext">3 with responses</p>
-          </div>
+    <div class="summary-box">
+      <h3>Profile Summary</h3>
+      <p>Your profile completeness and current stats</p>
+      <div class="stats">
+        <div class="stat-card">
+          <h4>Mentorship Sessions</h4>
+          <p class="value">12</p>
+          <p class="subtext">+2 from last month</p>
+        </div>
+        <div class="stat-card">
+          <h4>Average Rating</h4>
+          <p class="value">4.8/5</p>
+          <p class="subtext">Based on 8 reviews</p>
+        </div>
+        <div class="stat-card">
+          <h4>Community Posts</h4>
+          <p class="value">5</p>
+          <p class="subtext">3 with responses</p>
         </div>
       </div>
     </div>
-  </main>
+  </div>
+</main>
+
 
   <!-- Sign In Modal -->
   <div id="signinModal" class="modal hidden">
