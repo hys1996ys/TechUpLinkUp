@@ -130,3 +130,82 @@ nav a {
   color: #475569;
   line-height: 1.6;
 }
+
+/* Start: Style Sign-Up */
+
+.modal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  z-index: 999;
+}
+
+.modal.hidden {
+  display: none;
+}
+
+.modal-content {
+  position: relative; /* <-- Add this line */
+  background-color: #ffffff;
+  padding: 1.5rem 2rem;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 360px;
+  font-family: 'Inter', sans-serif;
+}
+
+
+.modal-content h2 {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.modal-content input {
+  width: 100%;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.modal-content input:focus {
+  border-color: #2563eb;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+.modal-content .btn-primary {
+  width: 100%;
+  padding: 0.75rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.close,
+.close-signin {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #6b7280;
+  cursor: pointer;
+  position: absolute;
+  top: 16px;
+  right: 20px;
+}
+
+.close:hover,
+.close-signin:hover {
+  color: #111827;
+}
+
+
+/* End: Style Sign-Up */
