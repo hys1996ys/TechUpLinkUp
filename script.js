@@ -21,9 +21,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   const userGreeting = document.getElementById('userGreeting');
   const userNameEl = document.getElementById('userName');
   const profileCard = document.getElementById('profileCard');
+  const toggleBtn = document.getElementById('toggleApplications');
+
 
 
   let choicesInstance, commModeInstance, learningStyleInstance;
+  let acceptingApplications = false; 
 
   // Initialize Choices.js
   choicesInstance = new Choices(skillsSelect, {
@@ -167,6 +170,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
+  toggleBtn.addEventListener('click', async () => {
+  acceptingApplications = !acceptingApplications;
+
+  toggleBtn.classList.toggle('active', acceptingApplications);
+  toggleBtn.textContent = acceptingApplications
+    ? 'I am accepting mentee applications'
+    : 'Click to allow mentee applications';
+
+  const user = await getCurrentUser();
+  if (user) {
+    const { error } = await supabase
+      .from('profiles')
+      .update({ accepting_applications: acceptingApplications })
+      .eq('id', user.id);
+
+    if (error) {
+      alert('Failed to update status: ' + error.message);
+    }
+  }
+});
+
   function showUserGreeting(name) {
     if (userGreeting && userNameEl) {
       userNameEl.textContent = name || 'User';
@@ -200,4 +224,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     loadProfile(sessionData.session.user.id, showUserGreeting);
     toggleAuthButtons(true);
   }
+
+
+
 });

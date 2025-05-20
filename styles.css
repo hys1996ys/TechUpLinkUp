@@ -229,6 +229,31 @@ nav a {
 
 /* Style for profile.html */
 
+.mentor-cta {
+  background-color: #f0f7ff;
+  border-left: 4px solid #007bff;
+  padding: 16px 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  max-width: 720px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.mentor-cta h3 {
+  font-size: 1.25rem;
+  margin-bottom: 8px;
+  color: #007bff;
+  font-weight: 600;
+}
+
+.mentor-cta p {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #333;
+}
+
+
 
 .profile-container {
   padding: 2rem;
@@ -435,5 +460,58 @@ textarea.profile-input {
   color: #007bff;
   font-weight: bold;
 }
+
+.name-and-toggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+
+.name-and-toggle h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+.application-label {
+  background-color: #e6f0ff;
+  color: #007bff;
+  border: 1px solid #cce0ff;
+  border-radius: 16px;
+  font-size: 0.8rem;
+  padding: 4px 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.application-label.active {
+  background-color: #d1f5e1;
+  color: #28a745;
+  border-color: #a2e5bf;
+}
+
+
+.toggle-icon {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  color: #007bff;
+  cursor: pointer;
+  padding: 4px;
+  margin-bottom: 4px;
+  transition: transform 0.2s ease;
+}
+
+.toggle-icon.active {
+  color: #28a745; /* Green when accepting applications */
+}
+
+.toggle-icon:hover {
+  transform: scale(1.1);
+}
+
 
 /* End of Style for profile.html */

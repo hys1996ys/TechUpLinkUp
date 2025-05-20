@@ -30,11 +30,29 @@
   </nav>
 </header>
 
-<main class="profile-container">
+<br/>
 
+ <section class="mentor-cta">
+
+    <h1>LinkUp</h1>
+    <p>Ready to share your expertise?</p>
+    <p>
+    Complete your mentor profile to connect with mentees seeking guidance in your area of expertise.
+    Share your skills, learning styles, and availability to start making an impact.
+  </p>
+
+      <button class="btn btn-primary" id="editBtn">
+      <i class="fa-solid fa-pen"></i> Be a Mentor
+    </button>
+
+</div>
+
+  </section>
+
+<main class="profile-container">
   <div class="profile-right">
     <div class="tabs">
-      <button class="tab active">Overview</button>
+      <button class="tab active">My Profile</button>
       <button class="tab">Coffee Talks</button>
     </div>
 
@@ -43,9 +61,7 @@
 
         <!-- NEW: Floating edit/save button area -->
         <div class="profile-actions">
-          <button class="btn btn-primary" id="editBtn">
-            <i class="fa-solid fa-pen"></i> Edit Profile
-          </button>
+
           <button class="btn btn-success hidden" id="saveBtn">
             <i class="fa-solid fa-save"></i> Save Changes
           </button>
@@ -55,9 +71,13 @@
           <div class="avatar-circle" id="avatarCircle">A</div>
           <div class="profile-info">
             <!-- View Mode -->
-            <div class="display-field" id="nameDisplayWrapper">
-              <h2 id="nameDisplay"></h2>
-            </div>
+             <div class="name-and-toggle">
+      <h2 id="nameDisplay">Yan Si</h2>
+        <button id="toggleApplications" class="application-label">
+    Click to allow mentee applications
+  </button>
+      </button>
+    </div>
             <div class="display-field" id="designationDisplayWrapper">
               <p id="designationDisplay" class="designation"></p>
             </div>
