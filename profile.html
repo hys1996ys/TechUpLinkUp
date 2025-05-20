@@ -17,90 +17,111 @@
 </head>
 <body>
 
-  <header>
-    <div class="logo">LinkUp</div>
-    <nav>
-      <a href="index.html">Home</a>
-      <a href="profile.html" class="active">Profile</a>
-      <a href="mentorship.html">Mentorship</a>
-      <a href="discover.html">Discover</a>
-      <a href="community.html">Community</a>
-      <span id="userGreeting" class="user-greeting hidden">Hi, <strong id="userName">User</strong></span>
+<header>
+  <div class="logo">LinkUp</div>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="profile.html" class="active">Profile</a>
+    <a href="mentorship.html">Mentorship</a>
+    <a href="discover.html">Discover</a>
+    <a href="community.html">Community</a>
+    <span id="userGreeting" class="user-greeting hidden">Hi, <strong id="userName">User</strong></span>
+    <button class="btn btn-secondary hidden" id="logoutBtn">Log Out</button>
+  </nav>
+</header>
 
-<button class="btn btn-secondary hidden" id="logoutBtn">Log Out</button>
+<main class="profile-container">
 
-    </nav>
-  </header>
-
-  <main class="profile-container">
-    
   <div class="profile-right">
     <div class="tabs">
       <button class="tab active">Overview</button>
       <button class="tab">Coffee Talks</button>
     </div>
 
-     <section id="tabContentProfile">
-      <h2>My Profile</h2>
-      <div class="profile-card" id="profileCard">
+    <section id="tabContentProfile">
+      <div class="profile-card compact-view" id="profileCard">
+
+        <!-- NEW: Floating edit/save button area -->
+        <div class="profile-actions">
+          <button class="btn btn-primary" id="editBtn">
+            <i class="fa-solid fa-pen"></i> Edit Profile
+          </button>
+          <button class="btn btn-success hidden" id="saveBtn">
+            <i class="fa-solid fa-save"></i> Save Changes
+          </button>
+        </div>
+
         <div class="profile-row">
           <div class="avatar-circle" id="avatarCircle">A</div>
-          <div class="profile-details">
-            <label for="name">Name</label>
-      <input type="text" id="name" class="profile-input" placeholder="Your name" disabled />
+          <div class="profile-info">
+            <!-- View Mode -->
+            <div class="display-field" id="nameDisplayWrapper">
+              <h2 id="nameDisplay"></h2>
+            </div>
+            <div class="display-field" id="designationDisplayWrapper">
+              <p id="designationDisplay" class="designation"></p>
+            </div>
+            <div class="display-field" id="descriptionDisplayWrapper">
+              <p id="descriptionDisplay" class="description"></p>
+            </div>
 
-      <label for="designation">Job Title</label>
-      <input type="text" id="designation" class="profile-input" placeholder="Job title" disabled />
-
-      <label for="description">Description</label>
-      <textarea id="description" class="profile-input" placeholder="Short description" disabled></textarea>
-
+            <!-- Edit Mode -->
+            <input type="text" id="name" class="profile-input hidden" placeholder="Your name" />
+            <input type="text" id="designation" class="profile-input hidden" placeholder="Job title" />
+            <textarea id="description" class="profile-input hidden" placeholder="Short description"></textarea>
           </div>
         </div>
+
         <div class="profile-tags">
+          <!-- Skills -->
           <div class="tag-section">
             <strong>Skills</strong>
-            <select id="skills" class="profile-input" multiple disabled>
-          <option value="Leadership">Leadership</option>
-          <option value="Strategic Planning">Strategic Planning</option>
-          <option value="Team Management">Team Management</option>
-          <option value="Communication">Communication</option>
-          <option value="Project Management">Project Management</option>
-        </select>
- 
+            <div id="skillsDisplay" class="tag-list display-field"></div>
+            <select id="skills" class="profile-input hidden" multiple>
+              <option value="Leadership">Leadership</option>
+              <option value="Strategic Planning">Strategic Planning</option>
+              <option value="Team Management">Team Management</option>
+              <option value="Communication">Communication</option>
+              <option value="Project Management">Project Management</option>
+            </select>
           </div>
+
+          <!-- Communication Mode -->
           <div class="tag-section">
             <strong>Communication Mode</strong>
-                   <select id="commMode" class="profile-input" multiple disabled>
-          <option value="Virtual">Virtual</option>
-          <option value="In-Person">In-Person</option>
-          <option value="Chat/Messaging">Chat/Messaging</option>
-          <option value="Flexible">Flexible</option>
-        </select>
+            <div id="commModeDisplay" class="tag-list display-field"></div>
+            <select id="commMode" class="profile-input hidden" multiple>
+              <option value="Virtual">Virtual</option>
+              <option value="In-Person">In-Person</option>
+              <option value="Chat/Messaging">Chat/Messaging</option>
+              <option value="Flexible">Flexible</option>
+            </select>
           </div>
-        </div>
 
-                  <div class="tag-section">
+          <!-- Learning Styles -->
+          <div class="tag-section">
             <strong>Learning Styles</strong>
-            
-        <select id="learningStyle" class="profile-input" multiple disabled>
-          <option value="Directed">Directed</option>
-          <option value="Co-directed">Co-directed</option>
-          <option value="Consulting">Consulting</option>
-          <option value="Self-directed">Self-directed</option>
-        </select>
+            <div id="learningStyleDisplay" class="tag-list display-field"></div>
+            <select id="learningStyle" class="profile-input hidden" multiple>
+              <option value="Directed">Directed</option>
+              <option value="Co-directed">Co-directed</option>
+              <option value="Consulting">Consulting</option>
+              <option value="Self-directed">Self-directed</option>
+            </select>
           </div>
         </div>
 
-        <button class="btn btn-primary full-width" id="editBtn"><i class="fa-solid fa-pen"></i> Edit Profile</button>
       </div>
     </section>
+  </div>
 
-  <!-- Scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
-  <script src="supabaseConfig.js"></script>
-  <script src="script.js"></script>
+</main>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+<script src="supabaseConfig.js"></script>
+<script src="script.js"></script>
 
 </body>
 </html>
