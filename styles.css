@@ -229,112 +229,143 @@ nav a {
 
 /* Style for profile.html */
 
-/* Profile Layout */
-.profile-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2rem;
-  padding: 3rem 2rem;
-  box-sizing: border-box;
+
+/* Style for profile.html */
+
+body {
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+  background-color: #f8fafc;
 }
 
-.profile-left {
-  flex: 1;
-  min-width: 80px;
-  max-width: 420px;
-}
-
-.profile-right {
-  flex: 2;
-  min-width: 320px;
-}
-
-/* Profile Card */
-.profile-card {
+header {
   background-color: white;
-  padding: 2rem;
-  border-radius: 1rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-  margin-bottom: 2rem;
+  padding: 1rem 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
-.profile-card label {
-  font-weight: 600;
-  font-size: 0.95rem;
+.logo {
+  font-weight: 700;
+  font-size: 1.5rem;
   color: #0f172a;
 }
 
-
-.profile-input {
-  display: block;
-  width: 100%;
-  padding: 0.75rem;
-  margin-top: 0.5rem;
-  margin-bottom: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 0.5rem;
-  font-size: 1rem;
-  box-sizing: border-box;
+nav {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
 }
 
-textarea.profile-input {
-  resize: vertical;
-  min-height: 100px;
-}
-
-.choices {
-  width: 100%;
-  max-width: 100%;
-  padding: 0.75rem !important;
-  margin-top: 0.5rem;
-  margin-bottom: 1rem;
-  border-radius: 0.5rem;
-  box-sizing: border-box;
-}
-
-
-
-.choices__list--multiple .choices__item {
-  background-color: #e5e7eb;  /* light grey background for saved state */
-  color: #374151;              /* darker grey text */
-  border-radius: 9999px;
-  font-size: 0.85rem;
+nav a {
+  text-decoration: none;
+  color: #0f172a;
   font-weight: 500;
-  padding: 0.3rem 0.75rem;
-  margin: 0.25rem;
+}
+
+.btn {
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
   border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.95rem;
 }
 
-
-
-.profile-input:focus {
-  border-color: #007bff;
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
+.btn-primary {
+  background-color: #007bff;
+  color: white;
 }
 
-.profile-card.editing {
-  border: 2px solid #007bff;
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.15);
+.btn-secondary {
+  background-color: #f3f4f6;
+  color: #111827;
+  border: 1px solid #d1d5db;
+}
+
+.profile-container {
+  padding: 2rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.tabs {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.tab {
+  background-color: #f1f5f9;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  color: #334155;
+  border: none;
+  cursor: pointer;
+}
+
+.tab.active {
+  background-color: #ffffff;
+  border: 2px solid #cbd5e1;
+  color: #0f172a;
+}
+
+h2 {
+  font-size: 1.75rem;
+  color: #0f172a;
+  margin-bottom: 1.5rem;
+}
+
+.profile-card {
+  background-color: #ffffff;
+  padding: 2rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+}
+
+.profile-row {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  margin-bottom: 1rem;
 }
 
 .avatar-circle {
-  width: 80px;
-  height: 80px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
-  background-color: #007bff;
+  background-color: #0ea5e9;
   color: white;
-  font-weight: bold;
-  font-size: 1.8rem;
+  font-size: 1.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 1rem;
+  font-weight: bold;
 }
 
-/* Tags and Domains */
-.tag-group {
-  width: 100%;
+.profile-details h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #0f172a;
+}
+
+.profile-details .designation {
+  margin: 0;
+  font-size: 1rem;
+  color: #64748b;
+}
+
+.profile-tags {
+  margin-top: 1rem;
+}
+
+.tag-section {
+  margin-bottom: 1rem;
 }
 
 .tags {
@@ -344,39 +375,27 @@ textarea.profile-input {
   margin-top: 0.5rem;
 }
 
-.tag {
+.tags .tag {
   background-color: #e0f2fe;
-  color: #0f172a;
-  font-size: 0.8rem;
-  font-weight: 500;
-  padding: 0.3rem 0.75rem;
+  color: #0ea5e9;
+  font-size: 0.85rem;
+  padding: 0.35rem 0.75rem;
   border-radius: 9999px;
+  font-weight: 500;
 }
 
-/* Spacing below skills and before buttons */
-.tag-group {
-  margin-bottom: 1.5rem;
-}
-
-#editBtn,
-#saveBtn {
-  margin-top: 0.5rem;
-}
-
-
-.domain {
-  background-color: #d1fae5;
-  color: #047857;
-}
-
-/* Full width button */
 .full-width {
-  width: 100%;
-  justify-content: center;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  justify-content: center;
+  width: 100%;
+  margin-top: 1.5rem;
 }
+
+.hidden {
+  display: none;
+}
+
 
 /* Tabs */
 .tabs {
@@ -402,101 +421,7 @@ textarea.profile-input {
   border-color: #0ea5e9;
 }
 
-/* Summary Box */
-.summary-box {
-  background-color: white;
-  padding: 2rem;
-  border-radius: 0.75rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
 
-.summary-box h3 {
-  margin: 0;
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #0f172a;
-}
-
-.summary-box p {
-  margin: 0.5rem 0 2rem;
-  font-size: 0.95rem;
-  color: #475569;
-}
-
-.stats {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1.5rem;
-}
-
-.stat-card {
-  background-color: #f9fafb;
-  padding: 1.5rem;
-  border-radius: 0.75rem;
-  flex: 1;
-  min-width: 180px;
-  text-align: left;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
-}
-
-.stat-card h4 {
-  font-size: 0.95rem;
-  color: #0f172a;
-  margin-bottom: 0.5rem;
-}
-
-.stat-card .value {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #0f172a;
-}
-
-.stat-card .subtext {
-  font-size: 0.85rem;
-  color: #6b7280;
-}
-
-.user-greeting {
-  margin-left: auto;
-  margin-right: 1rem;
-  font-weight: 500;
-  color: #333;
-}
-
-/* Tooltip for info icons */
-.info-icon {
-  margin-left: 0.5rem;
-  color: #0ea5e9;
-  cursor: pointer;
-  position: relative;
-  font-size: 1rem;
-}
-
-.info-icon:hover .tooltip {
-  visibility: visible;
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.tooltip {
-  visibility: hidden;
-  opacity: 0;
-  position: absolute;
-  top: 1.5rem;
-  left: 0;
-  background-color: #f9fafb;
-  color: #0f172a;
-  padding: 1rem;
-  font-size: 0.85rem;
-  border-radius: 0.5rem;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  width: 300px;
-  z-index: 10;
-  transition: all 0.2s ease-in-out;
-  transform: translateY(-5px);
-  white-space: normal;
-  line-height: 1.4;
-}
-
+/* End of Style for profile.html */
 
 /* End of Style for profile.html */
