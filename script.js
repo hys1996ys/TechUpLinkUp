@@ -137,7 +137,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   async function loadProfile(userId, callback) {
     const { data, error } = await supabase
       .from('profiles')
-      .select('name, designation, description, skills, comm_mode, learning_style')
+      .select('name, designation, description, skills, comm_mode, learning_style, accepting_applications')
       .eq('id', userId)
       .single();
 
@@ -168,6 +168,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         learning_style: []
       });
     }
+
+    if (data.accepting_applications) {
+  acceptingApplications = true;
+  toggleBtn.classList.add('active');
+  toggleBtn.textContent = 'Actively accepting applications';
+  document.getElementById('applicationStatus')?.classList.remove('hidden');
+} else {
+  acceptingApplications = false;
+  toggleBtn.classList.remove('active');
+  toggleBtn.textContent = 'Not accepting applications';
+  document.getElementById('applicationStatus')?.classList.add('hidden');
+}
+
+
   }
 
   toggleBtn.addEventListener('click', async () => {
@@ -175,8 +189,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   toggleBtn.classList.toggle('active', acceptingApplications);
   toggleBtn.textContent = acceptingApplications
-    ? 'I am accepting mentee applications'
-    : 'Click to allow mentee applications';
+    ? 'Actively accepting applications'
+    : 'Not accepting applications';
+
+  document.getElementById('applicationStatus')?.classList.toggle('hidden', !acceptingApplications);
+
 
   const user = await getCurrentUser();
   if (user) {

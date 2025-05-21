@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>LinkUp | Profile</title>
+  <title>Mentor Profile</title>
 
   <!-- Fonts & Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -35,16 +35,38 @@
 <main class="profile-section">
   <!-- CTA Box -->
   <section class="mentor-cta">
-    <h1>LinkUp</h1>
-    <p>Ready to share your expertise?</p>
-    <p>
-      Complete your mentor profile to connect with mentees seeking guidance in your area of expertise.
-      Share your skills, learning styles, and availability to start making an impact.
-    </p>
-    <button class="btn btn-primary" id="editBtn">
-      <i class="fa-solid fa-pen"></i> Be a Mentor
-    </button>
-  </section>
+  <div class="cta-content">
+    <div class="cta-text">
+      <h1>Become a Mentor Today</h1>
+      <p>Ready to share your expertise?</p>
+      <p>
+        Complete your mentor profile to connect with mentees seeking guidance in your area of expertise.
+        Share your skills, learning styles, and availability to start making an impact.
+      </p>
+    </div>
+    <div class="cta-actions">
+            <button class="btn btn-primary" id="editBtn">
+        <i class="fa-solid fa-pen"></i> Be a Mentor
+      </button>
+      
+      <button id="toggleApplications" class="application-label">
+        Actively accepting applications
+      </button>
+
+    </div>
+  </div>
+</section>
+
+<section id="applicationStatus" class="hidden status-banner">
+  <div class="status-icon">
+    <i class="fa-solid fa-check"></i>
+  </div>
+  <div class="status-text">
+    <strong>You're accepting mentee applications</strong>
+    <p>Mentees can now send you requests for mentorship.</p>
+  </div>
+</section>
+
 
   <!-- Profile Card Box -->
   <section class="profile-card compact-view" id="profileCard">
@@ -59,76 +81,74 @@
       </button>
     </div>
 
-    <div class="profile-row">
-      <div class="avatar-circle" id="avatarCircle">Y</div>
-      <div class="profile-info">
-        <div class="name-and-toggle">
-          <h2 id="nameDisplay">Yan Si22</h2>
-          <button id="toggleApplications" class="application-label">
-            Click to allow mentee applications
-          </button>
-        </div>
-        <div class="display-field" id="designationDisplayWrapper">
-          <p id="designationDisplay" class="designation">Data Analyst</p>
-        </div>
-        <div class="display-field" id="descriptionDisplayWrapper">
-          <p id="descriptionDisplay" class="description">
-            i am you uou and me i am you uou and me i am you uou and me i am you uou and me...
-          </p>
-        </div>
+   <div class="profile-row profile-details-grid">
+  <!-- Left Column -->
+<div class="profile-left">
+  <div class="top-section">
+    <div class="avatar-circle" id="avatarCircle">J</div>
+    <div class="profile-meta">
+      <h2 id="nameDisplay">Jasmine</h2>
+      <p id="designationDisplay" class="designation">Data Analyst</p>
+    </div>
+  </div>
 
-        <!-- Edit Fields -->
-        <input type="text" id="name" class="profile-input hidden" placeholder="Your name" />
-        <input type="text" id="designation" class="profile-input hidden" placeholder="Job title" />
-        <textarea id="description" class="profile-input hidden" placeholder="Short description"></textarea>
+  <div class="tag-section description-section">
+    <strong>Description</strong>
+    <p id="descriptionDisplay" class="description">long text long text long text...</p>
+  </div>
+
+  <!-- Edit fields (keep hidden) -->
+  <input type="text" id="name" class="profile-input hidden" placeholder="Your name" />
+  <input type="text" id="designation" class="profile-input hidden" placeholder="Job title" />
+  <textarea id="description" class="profile-input hidden" placeholder="Short description"></textarea>
+</div>
+
+
+  <!-- Right Column -->
+  <div class="profile-right">
+    <div class="tag-section">
+      <strong>Skills</strong>
+      <div id="skillsDisplay" class="tag-list display-field">
+        <span class="badge">Project Management</span>
       </div>
+      <select id="skills" class="profile-input hidden" multiple>
+                      <option value="Leadership">Leadership</option>
+        <option value="Strategic Planning">Strategic Planning</option>
+        <option value="Team Management">Team Management</option>
+        <option value="Communication">Communication</option>
+        <option value="Project Management">Project Management</option>
+      </select>
     </div>
 
-    <div class="profile-tags">
-      <!-- Skills -->
-      <div class="tag-section">
-        <strong>Skills</strong>
-        <div id="skillsDisplay" class="tag-list display-field">
-          <span class="badge">Project Management</span>
-        </div>
-        <select id="skills" class="profile-input hidden" multiple>
-          <option value="Leadership">Leadership</option>
-          <option value="Strategic Planning">Strategic Planning</option>
-          <option value="Team Management">Team Management</option>
-          <option value="Communication">Communication</option>
-          <option value="Project Management">Project Management</option>
-        </select>
+    <div class="tag-section">
+      <strong>Communication Mode</strong>
+      <div id="commModeDisplay" class="tag-list display-field">
+        <span class="badge">Flexible</span>
       </div>
-
-      <!-- Communication Mode -->
-      <div class="tag-section">
-        <strong>Communication Mode</strong>
-        <div id="commModeDisplay" class="tag-list display-field">
-          <span class="badge">Flexible</span>
-        </div>
-        <select id="commMode" class="profile-input hidden" multiple>
-          <option value="Virtual">Virtual</option>
-          <option value="In-Person">In-Person</option>
-          <option value="Chat/Messaging">Chat/Messaging</option>
-          <option value="Flexible">Flexible</option>
-        </select>
-      </div>
-
-      <!-- Learning Styles -->
-      <div class="tag-section">
-        <strong>Learning Styles</strong>
-        <div id="learningStyleDisplay" class="tag-list display-field">
-          <!-- Empty or sample badge -->
-        </div>
-        <select id="learningStyle" class="profile-input hidden" multiple>
-          <option value="Directed">Directed</option>
-          <option value="Co-directed">Co-directed</option>
-          <option value="Consulting">Consulting</option>
-          <option value="Self-directed">Self-directed</option>
-        </select>
-      </div>
+      <select id="commMode" class="profile-input hidden" multiple>
+                    <option value="Virtual">Virtual</option>
+        <option value="In-Person">In-Person</option>
+        <option value="Chat/Messaging">Chat/Messaging</option>
+        <option value="Flexible">Flexible</option>
+      </select>
     </div>
-  </section>
+
+    <div class="tag-section">
+      <strong>Learning Styles</strong>
+      <div id="learningStyleDisplay" class="tag-list display-field">
+        <span class="badge">Co-directed</span>
+      </div>
+      <select id="learningStyle" class="profile-input hidden" multiple>
+                        <option value="Directed">Directed</option>
+        <option value="Co-directed">Co-directed</option>
+        <option value="Consulting">Consulting</option>
+        <option value="Self-directed">Self-directed</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+ </section>
 </main>
 
 <!-- Scripts -->
