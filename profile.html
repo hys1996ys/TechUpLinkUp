@@ -32,109 +32,103 @@
 
 <br/>
 
- <section class="mentor-cta">
-
+<main class="profile-section">
+  <!-- CTA Box -->
+  <section class="mentor-cta">
     <h1>LinkUp</h1>
     <p>Ready to share your expertise?</p>
     <p>
-    Complete your mentor profile to connect with mentees seeking guidance in your area of expertise.
-    Share your skills, learning styles, and availability to start making an impact.
-  </p>
-
-      <button class="btn btn-primary" id="editBtn">
+      Complete your mentor profile to connect with mentees seeking guidance in your area of expertise.
+      Share your skills, learning styles, and availability to start making an impact.
+    </p>
+    <button class="btn btn-primary" id="editBtn">
       <i class="fa-solid fa-pen"></i> Be a Mentor
     </button>
-
-</div>
-
   </section>
 
-<main class="profile-container">
-  <div class="profile-right">
+  <!-- Profile Card Box -->
+  <section class="profile-card compact-view" id="profileCard">
     <div class="tabs">
       <button class="tab active">My Profile</button>
       <button class="tab">Coffee Talks</button>
     </div>
 
-    <section id="tabContentProfile">
-      <div class="profile-card compact-view" id="profileCard">
-
-        <!-- NEW: Floating edit/save button area -->
-        <div class="profile-actions">
-
-          <button class="btn btn-success hidden" id="saveBtn">
-            <i class="fa-solid fa-save"></i> Save Changes
-          </button>
-        </div>
-
-        <div class="profile-row">
-          <div class="avatar-circle" id="avatarCircle">A</div>
-          <div class="profile-info">
-            <!-- View Mode -->
-             <div class="name-and-toggle">
-      <h2 id="nameDisplay">Yan Si</h2>
-        <button id="toggleApplications" class="application-label">
-    Click to allow mentee applications
-  </button>
+    <div class="profile-actions">
+      <button class="btn btn-success hidden" id="saveBtn">
+        <i class="fa-solid fa-save"></i> Save Changes
       </button>
     </div>
-            <div class="display-field" id="designationDisplayWrapper">
-              <p id="designationDisplay" class="designation"></p>
-            </div>
-            <div class="display-field" id="descriptionDisplayWrapper">
-              <p id="descriptionDisplay" class="description"></p>
-            </div>
 
-            <!-- Edit Mode -->
-            <input type="text" id="name" class="profile-input hidden" placeholder="Your name" />
-            <input type="text" id="designation" class="profile-input hidden" placeholder="Job title" />
-            <textarea id="description" class="profile-input hidden" placeholder="Short description"></textarea>
-          </div>
+    <div class="profile-row">
+      <div class="avatar-circle" id="avatarCircle">Y</div>
+      <div class="profile-info">
+        <div class="name-and-toggle">
+          <h2 id="nameDisplay">Yan Si22</h2>
+          <button id="toggleApplications" class="application-label">
+            Click to allow mentee applications
+          </button>
+        </div>
+        <div class="display-field" id="designationDisplayWrapper">
+          <p id="designationDisplay" class="designation">Data Analyst</p>
+        </div>
+        <div class="display-field" id="descriptionDisplayWrapper">
+          <p id="descriptionDisplay" class="description">
+            i am you uou and me i am you uou and me i am you uou and me i am you uou and me...
+          </p>
         </div>
 
-        <div class="profile-tags">
-          <!-- Skills -->
-          <div class="tag-section">
-            <strong>Skills</strong>
-            <div id="skillsDisplay" class="tag-list display-field"></div>
-            <select id="skills" class="profile-input hidden" multiple>
-              <option value="Leadership">Leadership</option>
-              <option value="Strategic Planning">Strategic Planning</option>
-              <option value="Team Management">Team Management</option>
-              <option value="Communication">Communication</option>
-              <option value="Project Management">Project Management</option>
-            </select>
-          </div>
-
-          <!-- Communication Mode -->
-          <div class="tag-section">
-            <strong>Communication Mode</strong>
-            <div id="commModeDisplay" class="tag-list display-field"></div>
-            <select id="commMode" class="profile-input hidden" multiple>
-              <option value="Virtual">Virtual</option>
-              <option value="In-Person">In-Person</option>
-              <option value="Chat/Messaging">Chat/Messaging</option>
-              <option value="Flexible">Flexible</option>
-            </select>
-          </div>
-
-          <!-- Learning Styles -->
-          <div class="tag-section">
-            <strong>Learning Styles</strong>
-            <div id="learningStyleDisplay" class="tag-list display-field"></div>
-            <select id="learningStyle" class="profile-input hidden" multiple>
-              <option value="Directed">Directed</option>
-              <option value="Co-directed">Co-directed</option>
-              <option value="Consulting">Consulting</option>
-              <option value="Self-directed">Self-directed</option>
-            </select>
-          </div>
-        </div>
-
+        <!-- Edit Fields -->
+        <input type="text" id="name" class="profile-input hidden" placeholder="Your name" />
+        <input type="text" id="designation" class="profile-input hidden" placeholder="Job title" />
+        <textarea id="description" class="profile-input hidden" placeholder="Short description"></textarea>
       </div>
-    </section>
-  </div>
+    </div>
 
+    <div class="profile-tags">
+      <!-- Skills -->
+      <div class="tag-section">
+        <strong>Skills</strong>
+        <div id="skillsDisplay" class="tag-list display-field">
+          <span class="badge">Project Management</span>
+        </div>
+        <select id="skills" class="profile-input hidden" multiple>
+          <option value="Leadership">Leadership</option>
+          <option value="Strategic Planning">Strategic Planning</option>
+          <option value="Team Management">Team Management</option>
+          <option value="Communication">Communication</option>
+          <option value="Project Management">Project Management</option>
+        </select>
+      </div>
+
+      <!-- Communication Mode -->
+      <div class="tag-section">
+        <strong>Communication Mode</strong>
+        <div id="commModeDisplay" class="tag-list display-field">
+          <span class="badge">Flexible</span>
+        </div>
+        <select id="commMode" class="profile-input hidden" multiple>
+          <option value="Virtual">Virtual</option>
+          <option value="In-Person">In-Person</option>
+          <option value="Chat/Messaging">Chat/Messaging</option>
+          <option value="Flexible">Flexible</option>
+        </select>
+      </div>
+
+      <!-- Learning Styles -->
+      <div class="tag-section">
+        <strong>Learning Styles</strong>
+        <div id="learningStyleDisplay" class="tag-list display-field">
+          <!-- Empty or sample badge -->
+        </div>
+        <select id="learningStyle" class="profile-input hidden" multiple>
+          <option value="Directed">Directed</option>
+          <option value="Co-directed">Co-directed</option>
+          <option value="Consulting">Consulting</option>
+          <option value="Self-directed">Self-directed</option>
+        </select>
+      </div>
+    </div>
+  </section>
 </main>
 
 <!-- Scripts -->

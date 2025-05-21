@@ -32,14 +32,21 @@ nav a {
 }
 
 .btn {
-  padding: 0.5rem 1rem;
-  border-radius: 0.375rem;
+  padding: 10px 16px;
+  font-size: 1rem;
+  border-radius: 6px;
   border: none;
   cursor: pointer;
+  font-weight: 600;
 }
 
 .btn-primary {
-  background-color: #0ea5e9;
+  background-color: #007bff;
+  color: white;
+}
+
+.btn-success {
+  background-color: #28a745;
   color: white;
 }
 
@@ -86,7 +93,7 @@ nav a {
   justify-content: center;
   gap: 2rem;
   padding-top: 2rem;
-  flex-wrap: nowrap; /* Prevents wrapping into a new row */
+  flex-wrap: nowrap;
 }
 
 .card {
@@ -97,36 +104,25 @@ nav a {
   width: 300px;
   display: flex;
   flex-direction: column;
-  align-items: flex-start; /* Align content to the left */
-  text-align: left;        /* Align text to the left */
+  align-items: flex-start;
+  text-align: left;
   box-sizing: border-box;
 }
 
-
-.icon-wrapper {
+.icon-wrapper,
+.icon-container {
   background-color: #e0f2fe;
   border-radius: 9999px;
   padding: 0.75rem;
- 
-}
-
-
-
-.icon-container {
-  background-color: #e0f2fe; /* Light blue background */
-  padding: 0.75rem;
-  border-radius: 9999px;
   display: flex;
   align-items: center;
   justify-content: center;
- 
 }
-
 
 .icon {
   color: #0ea5e9;
   font-size: 1.5rem;
-   margin-bottom: 1rem; /* ← Add this for spacing below icon */
+  margin-bottom: 1rem;
 }
 
 .card h3 {
@@ -143,8 +139,6 @@ nav a {
   line-height: 1.6;
 }
 
-/* Start: Style Sign-Up */
-
 .hidden {
   display: none !important;
 }
@@ -159,12 +153,8 @@ nav a {
   z-index: 999;
 }
 
-.modal.hidden {
-  display: none;
-}
-
 .modal-content {
-  position: relative; /* <-- Add this line */
+  position: relative;
   background-color: #ffffff;
   padding: 1.5rem 2rem;
   border-radius: 12px;
@@ -173,7 +163,6 @@ nav a {
   max-width: 360px;
   font-family: 'Inter', sans-serif;
 }
-
 
 .modal-content h2 {
   font-size: 1.25rem;
@@ -223,37 +212,42 @@ nav a {
   color: #111827;
 }
 
+.profile-section {
+  max-width: 960px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
 
-/* End: Style Sign-Up */
-
-
-/* Style for profile.html */
+.mentor-cta,
+.profile-card {
+  width: 100%;
+  box-sizing: border-box;
+}
 
 .mentor-cta {
   background-color: #f0f7ff;
   border-left: 4px solid #007bff;
   padding: 16px 20px;
   border-radius: 8px;
-  margin-bottom: 20px;
-  max-width: 720px;
-  margin-left: auto;
-  margin-right: auto;
+  font-size: 0.95rem;
+  
 }
 
-.mentor-cta h3 {
-  font-size: 1.25rem;
-  margin-bottom: 8px;
+.mentor-cta h1 {
+  font-size: 1.5rem;
   color: #007bff;
-  font-weight: 600;
+  margin-bottom: 8px;
 }
 
 .mentor-cta p {
-  font-size: 0.95rem;
-  line-height: 1.5;
+  margin-bottom: 8px;
   color: #333;
+  line-height: 1.5;
 }
-
-
 
 .profile-container {
   padding: 2rem;
@@ -261,18 +255,16 @@ nav a {
   justify-content: center;
 }
 
-/* Profile Card */
 .profile-card {
-  max-width: 720px;
-  width: 100%;
-  margin: auto;
+  width: 1080px;
+  max-width: 100%;
   padding: 16px 20px;
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.05);
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
   transition: all 0.2s ease-in-out;
 }
-
 
 .profile-row {
   display: flex;
@@ -281,7 +273,6 @@ nav a {
   flex-wrap: wrap;
   margin-bottom: 12px;
 }
-
 
 .avatar-circle {
   width: 68px;
@@ -297,8 +288,6 @@ nav a {
   flex-shrink: 0;
 }
 
-
-/* Profile Info */
 .profile-info h2 {
   margin: 0;
   font-size: 1.2rem;
@@ -306,23 +295,13 @@ nav a {
   line-height: 1.3;
 }
 
-.profile-info .designation {
-  font-size: 0.95rem;
-  color: #666;
- margin-top: 4px;
-  margin-bottom: 6px; /* adds spacing before description */
-}
-
 .profile-info .description {
   font-size: 0.9rem;
-  line-height: 1.3;
-  word-break: break-word;
+  line-height: 1.5;
+  word-wrap: break-word;
+  white-space: normal;
 }
 
-
-
-
-/* Inputs */
 .profile-input {
   width: 100%;
   padding: 8px 10px;
@@ -334,10 +313,9 @@ nav a {
 }
 
 textarea.profile-input {
-  min-height: 80px;
-  resize: vertical;
+  max-height: 100px;
+  overflow-y: auto;
 }
-
 
 .choices__inner {
   min-height: 44px;
@@ -346,16 +324,14 @@ textarea.profile-input {
 }
 
 .choices__list--multiple .choices__item {
-  background-color: #e6f0ff ; 
-  color: #007bff;              
+  background-color: #e6f0ff;
+  color: #007bff;
   border-radius: 12px;
   padding: 4px 10px;
   margin: 2px;
   font-size: 0.85rem;
 }
 
-
-/* Tag Sections */
 .profile-tags {
   margin-top: 24px;
 }
@@ -370,55 +346,27 @@ textarea.profile-input {
   font-weight: 600;
 }
 
-/* Tag List (View Mode) */
 .tag-list {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-   margin-bottom: 6px;
+  margin-bottom: 6px;
 }
 
-/* Styled badges for display mode */
 .badge {
   background-color: #e6f0ff;
-  color: #007bff;           
+  color: #007bff;
   padding: 6px 12px;
   border-radius: 16px;
   font-size: 0.85rem;
-   margin-bottom: 6px;
+  margin-bottom: 6px;
 }
-
-/* Buttons */
-.btn {
-  padding: 10px 16px;
-  font-size: 1rem;
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
-}
-
-.btn-primary {
-  background-color: #007bff;
-  color: white;
-}
-
-.btn-success {
-  background-color: #28a745;
-  color: white;
-}
-
 
 .full-width {
   width: 100%;
   margin-top: 12px;
 }
 
-/* Utilities */
-.hidden {
-  display: none !important;
-}
-
-/* Hide choices.js UI wrapper unless editing */
 .choices {
   display: none;
 }
@@ -434,13 +382,10 @@ textarea.profile-input {
   margin-bottom: 10px;
 }
 
-
 .profile-actions .btn {
   font-weight: 600;
   padding: 10px 16px;
 }
-
-
 
 .tabs {
   margin-bottom: 20px;
@@ -475,6 +420,7 @@ textarea.profile-input {
   font-weight: 600;
   line-height: 1.2;
 }
+
 .application-label {
   background-color: #e6f0ff;
   color: #007bff;
@@ -493,7 +439,6 @@ textarea.profile-input {
   border-color: #a2e5bf;
 }
 
-
 .toggle-icon {
   background: none;
   border: none;
@@ -506,12 +451,9 @@ textarea.profile-input {
 }
 
 .toggle-icon.active {
-  color: #28a745; /* Green when accepting applications */
+  color: #28a745;
 }
 
 .toggle-icon:hover {
   transform: scale(1.1);
 }
-
-
-/* End of Style for profile.html */
