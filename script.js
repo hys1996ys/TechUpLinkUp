@@ -1,3 +1,7 @@
+
+
+// For Profile.html
+
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -245,3 +249,103 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// For all pages
+document.addEventListener('DOMContentLoaded', () => {
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  const signInBtn = document.getElementById('openSignin');
+  const signUpBtn = document.getElementById('openSignup');
+  const signInModal = document.getElementById('signinModal');
+  const signUpModal = document.getElementById('signupModal');
+  const closeSignIn = document.querySelector('.close-signin');
+  const closeSignUp = document.querySelector('.close');
+
+  // Show modals
+  if (signInBtn && signInModal) {
+    signInBtn.addEventListener('click', () => {
+      signInModal.classList.remove('hidden');
+    });
+  }
+
+  if (signUpBtn && signUpModal) {
+    signUpBtn.addEventListener('click', () => {
+      signUpModal.classList.remove('hidden');
+    });
+  }
+
+  // Close modals
+  if (closeSignIn && signInModal) {
+    closeSignIn.addEventListener('click', () => {
+      signInModal.classList.add('hidden');
+    });
+  }
+
+  if (closeSignUp && signUpModal) {
+    closeSignUp.addEventListener('click', () => {
+      signUpModal.classList.add('hidden');
+    });
+  }
+
+  // Sign In Logic
+  const signinForm = document.getElementById('signinForm');
+  if (signinForm) {
+    signinForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('signin-email').value;
+      const password = document.getElementById('signin-password').value;
+
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        alert('Login failed: ' + error.message);
+      } else {
+        alert('Logged in successfully');
+        window.location.href = 'profile.html'; // or index.html
+      }
+    });
+  }
+
+  // Sign Up Logic
+  const signupForm = document.getElementById('signupForm');
+  if (signupForm) {
+    signupForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      const { data, error } = await supabase.auth.signUp({ email, password });
+
+      if (error) {
+        alert('Sign up failed: ' + error.message);
+      } else {
+        alert('Account created! Please log in.');
+        signUpModal.classList.add('hidden');
+      }
+    });
+  }
+});
+
+

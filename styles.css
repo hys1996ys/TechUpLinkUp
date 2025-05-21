@@ -467,9 +467,10 @@ textarea.profile-input {
 }
 
 .application-label.active {
-  background-color: #d1f5e1;
-  color: #28a745;
-  border-color: #a2e5bf;
+  background-color: #ecfdf5;
+  color: #064e3b;
+  border: 1px solid #bbf7d0;
+   font-weight: 500;
 }
 
 
@@ -485,8 +486,10 @@ textarea.profile-input {
 }
 
 .toggle-icon.active {
-  color: #28a745;
+  color: #064e3b;
+  background-color: #ecfdf5;
 }
+
 
 .toggle-icon:hover {
   transform: scale(1.1);
