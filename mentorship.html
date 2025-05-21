@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Mentees</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="styles.css" />
+
+</head>
+<body>
+
+<header>
+  <div class="logo">LinkUp</div>
+  <nav>
+    <span id="userGreeting" class="user-greeting hidden">Hi, <strong id="userName">User</strong></span>
+    <a href="index.html">Home</a>
+    <a href="profile.html">Profile</a>
+    <a href="mentorship.html" class="active">Mentorship</a>
+    <a href="discover.html">Discover</a>
+    <a href="community.html">Community</a>
+    <button class="btn btn-secondary hidden" id="logoutBtn">Log Out</button>
+  </nav>
+</header>
+
+<main class="profile-section">
+
+  <!-- Active Mentees -->
+  <section class="mentor-cta">
+    <div class="cta-text">
+      <h1>Active Mentorships</h1>
+      <p>Mentees you are currently guiding and developing</p>
+    </div>
+    <div class="scroll-container active"></div>
+  </section>
+
+  <!-- Pending Applications -->
+  <section class="mentor-cta">
+    <div class="cta-text">
+      <h1>Pending Applications</h1>
+      <p>Mentees who have applied to be mentored by you</p>
+    </div>
+    <div class="scroll-container pending"></div>
+  </section>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script src="supabaseConfig.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const { data: session } = await supabase.auth.getSession();
+  const user = session?.session?.user;
+
+  if (!user) return;
+
+  const { data: mentorships, error } = await supabase
+    .from('mentorships')
+    .select('mentee_id, status, compatibility_score, mentee:profiles(name, id, designation, skills, learning_goals)')
+    .eq('mentor_id', user.id);
+
+  if (error) return console.error(error);
+
+  const active = mentorships.filter(m => m.status === 'active').slice(0, 3);
+  const pending = mentorships
+    .filter(m => m.status === 'pending')
+    .sort((a, b) => b.compatibility_score - a.compatibility_score);
+
+  const renderCard = (mentee, score, isPending = false) => {
+    const initials = mentee.name?.charAt(0)?.toUpperCase() || 'U';
+    const skills = (mentee.skills || []).map(skill => `<span class="badge">${skill}</span>`).join('');
+    const goals = (mentee.learning_goals || []).map(g => `<span class="badge">${g}</span>`).join('');
+    const matchBar = isPending
+      ? `
+        <div class="compat-label">${score}% Match</div>
+        <div class="compat-bar"><div class="compat-fill" style="width: ${score}%;"></div></div>`
+      : '';
+
+    const actionBtn = isPending
+      ? `<button class="btn btn-success full-width" onclick="acceptMentee('${mentee.id}')">Accept Mentee</button>`
+      : `<button class="btn full-width"><i class="fa fa-eye"></i> View Profile</button>`;
+
+    return `
+      <div class="mentee-card">
+        <div class="avatar-circle-sm">${initials}</div>
+        <h3>${mentee.name}</h3>
+        <p>${mentee.designation || ''}</p>
+        ${matchBar}
+        <strong>Learning Goals</strong>
+        <div class="badge-group">${goals}</div>
+        <strong>Current Skills</strong>
+        <div class="badge-group">${skills}</div>
+        ${actionBtn}
+      </div>`;
+  };
+
+  document.querySelector('.scroll-container.active').innerHTML = active.map(m =>
+    renderCard(m.mentee, null, false)).join('') + `
+    <div class="mentee-card" style="text-align:center;justify-content:center;display:flex;flex-direction:column;align-items:center;">
+      <i class="fa fa-user-plus fa-2x" style="color:#94a3b8;margin-bottom:1rem;"></i>
+      <h3>Find more mentees</h3>
+      <p>Connect with motivated individuals who match your expertise</p>
+      <button class="btn btn-primary full-width">Browse Mentees</button>
+    </div>`;
+
+  document.querySelector('.scroll-container.pending').innerHTML =
+    pending.map(m => renderCard(m.mentee, m.compatibility_score, true)).join('');
+});
+
+async function acceptMentee(menteeId) {
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const { data: session } = await supabase.auth.getSession();
+  const user = session?.session?.user;
+
+  const { error } = await supabase
+    .from('mentorships')
+    .update({ status: 'active' })
+    .eq('mentor_id', user.id)
+    .eq('mentee_id', menteeId);
+
+  if (error) {
+    alert('Failed to accept mentee');
+    console.error(error);
+  } else {
+    alert('Mentee accepted!');
+    location.reload();
+  }
+}
+</script>
+</body>
+</html>
