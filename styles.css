@@ -669,3 +669,100 @@ textarea.profile-input {
   border-color: #0ea5e9;
 }
  
+/* Modal Container */
+.modal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  z-index: 999;
+}
+
+/* Modal Inner Box */
+.modal-content {
+  position: relative;
+  background-color: #ffffff;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 420px;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Modal Title */
+.modal-content h2 {
+  font-size: 1.25rem;
+  margin-bottom: 1.25rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+/* Form Inputs */
+.modal-content label {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 0.5rem;
+}
+
+.modal-content textarea,
+.modal-content select {
+  width: 100%;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.modal-content textarea:focus,
+.modal-content select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+/* Submit Button */
+.modal-content .btn-primary {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+  background-color: #007bff;
+  color: white;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+
+/* Close Button */
+.modal .close {
+  position: absolute;
+  top: 1rem;
+  right: 1.25rem;
+  font-size: 1.5rem;
+  color: #6b7280;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.modal .close:hover {
+  color: #111827;
+}
+
+select[multiple] {
+  width: 100%;
+  height: auto;
+  min-height: 100px;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  background-color: #fff;
+}
