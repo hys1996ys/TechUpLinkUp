@@ -654,4 +654,18 @@ textarea.profile-input {
       margin-bottom: 4px;
       color: #007bff;
     }
+
+    .toggle-btn {
+  padding: 0.5rem 1.5rem;
+  border: 1px solid #ccc;
+  background: #f1f5f9;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.toggle-btn.active {
+  background: #0ea5e9;
+  color: white;
+  border-color: #0ea5e9;
+}
  
