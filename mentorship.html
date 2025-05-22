@@ -7,7 +7,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="styles.css" />
-
 </head>
 <body>
 
@@ -53,62 +52,65 @@ document.addEventListener('DOMContentLoaded', async () => {
   const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   const { data: session } = await supabase.auth.getSession();
   const user = session?.session?.user;
-
   if (!user) return;
 
-  const { data: mentorships, error } = await supabase
-    .from('mentorships')
-    .select('mentee_id, status, compatibility_score, mentee:profiles(name, id, designation, skills, learning_goals)')
-    .eq('mentor_id', user.id);
+  // Suggest mentors if needed
+  await supabase.rpc('suggest_mentors_for_user', { user_id: user.id });
+
+  // Subscribe to real-time updates
+  supabase
+    .channel('mentorships-updates')
+    .on('postgres_changes', {
+      event: '*',
+      schema: 'public',
+      table: 'mentorships',
+      filter: `mentor_id=eq.${user.id}`
+    }, () => location.reload())
+    .subscribe();
+
+const { data: mentorships, error } = await supabase
+  .from('mentorships')
+  .select(`
+    mentee_id,
+    status,
+    compatibility_score,
+    mentee:profiles!mentorships_mentee_id_fkey (
+      id,
+      name,
+      designation,
+      skills,
+      learning_goals
+    )
+  `)
+  .eq('mentor_id', user.id);
+
 
   if (error) return console.error(error);
 
   const active = mentorships.filter(m => m.status === 'active').slice(0, 3);
+  console.log("Active mentees:", active.length);
   const pending = mentorships
     .filter(m => m.status === 'pending')
     .sort((a, b) => b.compatibility_score - a.compatibility_score);
 
-  const renderCard = (mentee, score, isPending = false) => {
-    const initials = mentee.name?.charAt(0)?.toUpperCase() || 'U';
-    const skills = (mentee.skills || []).map(skill => `<span class="badge">${skill}</span>`).join('');
-    const goals = (mentee.learning_goals || []).map(g => `<span class="badge">${g}</span>`).join('');
-    const matchBar = isPending
-      ? `
-        <div class="compat-label">${score}% Match</div>
-        <div class="compat-bar"><div class="compat-fill" style="width: ${score}%;"></div></div>`
-      : '';
+  const activeContainer = document.querySelector('.scroll-container.active');
+  const pendingContainer = document.querySelector('.scroll-container.pending');
 
-    const actionBtn = isPending
-      ? `<button class="btn btn-success full-width" onclick="acceptMentee('${mentee.id}')">Accept Mentee</button>`
-      : `<button class="btn full-width"><i class="fa fa-eye"></i> View Profile</button>`;
+  // Render active mentees
+  activeContainer.innerHTML = active.map(m =>
+    renderCard(m.mentee, null, false)).join('');
 
-    return `
-      <div class="mentee-card">
-        <div class="avatar-circle-sm">${initials}</div>
-        <h3>${mentee.name}</h3>
-        <p>${mentee.designation || ''}</p>
-        ${matchBar}
-        <strong>Learning Goals</strong>
-        <div class="badge-group">${goals}</div>
-        <strong>Current Skills</strong>
-        <div class="badge-group">${skills}</div>
-        ${actionBtn}
-      </div>`;
-  };
+  // Render Add or Limit card
+  activeContainer.innerHTML += active.length < 3
+    ? renderAddMenteeCard()
+    : renderMenteeLimitReachedCard();
 
-  document.querySelector('.scroll-container.active').innerHTML = active.map(m =>
-    renderCard(m.mentee, null, false)).join('') + `
-    <div class="mentee-card" style="text-align:center;justify-content:center;display:flex;flex-direction:column;align-items:center;">
-      <i class="fa fa-user-plus fa-2x" style="color:#94a3b8;margin-bottom:1rem;"></i>
-      <h3>Find more mentees</h3>
-      <p>Connect with motivated individuals who match your expertise</p>
-      <button class="btn btn-primary full-width">Browse Mentees</button>
-    </div>`;
-
-  document.querySelector('.scroll-container.pending').innerHTML =
-    pending.map(m => renderCard(m.mentee, m.compatibility_score, true)).join('');
+  // Render pending applications
+  pendingContainer.innerHTML = pending.map(m =>
+    renderCard(m.mentee, m.compatibility_score, true)).join('');
 });
 
+// Accept mentee logic
 async function acceptMentee(menteeId) {
   const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   const { data: session } = await supabase.auth.getSession();
@@ -127,6 +129,60 @@ async function acceptMentee(menteeId) {
     alert('Mentee accepted!');
     location.reload();
   }
+}
+
+// Card templates
+function renderCard(mentee, score, isPending = false) {
+  const initials = mentee.name?.charAt(0)?.toUpperCase() || 'U';
+  const skills = (mentee.skills || []).map(skill => `<span class="badge">${skill}</span>`).join('');
+  const goals = (mentee.learning_goals || []).map(g => `<span class="badge">${g}</span>`).join('');
+  const matchBar = isPending
+    ? `<div class="compat-label">${score}% Match</div>
+       <div class="compat-bar"><div class="compat-fill" style="width: ${score}%;"></div></div>`
+    : '';
+
+  const actionBtn = isPending
+    ? `<button class="btn btn-success full-width" onclick="acceptMentee('${mentee.id}')">Accept Mentee</button>`
+    : `<button class="btn full-width"><i class="fa fa-eye"></i> View Profile</button>`;
+
+  return `
+    <div class="mentee-card">
+      <div class="avatar-circle-sm">${initials}</div>
+      <h3>${mentee.name}</h3>
+      <p>${mentee.designation || ''}</p>
+      ${matchBar}
+      <strong>Learning Goals</strong>
+      <div class="badge-group">${goals}</div>
+      <strong>Current Skills</strong>
+      <div class="badge-group">${skills}</div>
+      ${actionBtn}
+    </div>`;
+}
+
+// Dynamic extra cards
+function renderAddMenteeCard() {
+  return `
+    <div class="mentee-card" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;">
+      <i class="fa fa-user-plus fa-2x" style="color:#0ea5e9;margin-bottom:1rem;"></i>
+      <h3>Add New Mentee</h3>
+      <p>Invite someone new to learn under your guidance</p>
+      <button class="btn btn-primary full-width" onclick="openMenteeFinder()">Find Mentees</button>
+    </div>`;
+}
+
+
+function renderMenteeLimitReachedCard() {
+  return `
+    <div class="mentee-card" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;opacity:0.6;">
+      <i class="fa fa-user-lock fa-2x" style="color:#9ca3af;margin-bottom:1rem;"></i>
+      <h3>Mentee Limit Reached</h3>
+      <p>You already have 3 active mentees</p>
+      <button class="btn full-width" disabled>Limit Reached</button>
+    </div>`;
+}
+
+function openMenteeFinder() {
+  window.location.href = "discover.html#mentees";
 }
 </script>
 </body>
