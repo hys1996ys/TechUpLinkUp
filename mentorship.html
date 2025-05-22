@@ -8,6 +8,11 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="styles.css" />
 </head>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script src="supabaseConfig.js"></script>
+
 <body>
 
 <header>
@@ -58,8 +63,8 @@
     </section>
     <section class="mentor-cta">
       <div class="cta-text">
-        <h1>My Applications</h1>
-        <p>Applications you have sent to mentors</p>
+        <h1>Mentor Recommendations</h1>
+        <p>Recommendations</p>
       </div>
       <div class="scroll-container mentee-pending"></div>
     </section>
@@ -104,8 +109,6 @@
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-<script src="supabaseConfig.js"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', async () => {
@@ -129,6 +132,46 @@ document.addEventListener('DOMContentLoaded', async () => {
     menteeBtn.classList.add('active');
     mentorBtn.classList.remove('active');
   });
+
+    // Mentor Application Submission Handler
+  const mentorApplicationForm = document.getElementById('mentorApplicationForm');
+  mentorApplicationForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const { data: session } = await supabase.auth.getSession();
+    const user = session?.session?.user;
+    if (!user) {
+      alert("You must be logged in to apply for mentorship.");
+      return;
+    }
+
+    const learningOutcome = document.getElementById('learningOutcome').value;
+    const skills = Array.from(document.getElementById('appSkills').selectedOptions).map(opt => opt.value);
+    const learningStyles = Array.from(document.getElementById('appLearningStyles').selectedOptions).map(opt => opt.value);
+    const commModes = Array.from(document.getElementById('appCommModes').selectedOptions).map(opt => opt.value);
+
+    const { error } = await supabase.from('mentor_applications').insert({
+      user_id: user.id,
+      learning_outcome: learningOutcome,
+      skills: skills,
+      learning_style: learningStyles,
+      comm_mode: commModes
+    });
+
+    if (error) {
+      console.error("Submission failed", error);
+      alert("There was an error submitting your application.");
+    } else {
+      alert("Application submitted successfully!");
+      document.getElementById('mentorApplicationModal')?.classList.add('hidden');
+      mentorApplicationForm.reset();
+    }
+  });
+
+  document.getElementById('closeMentorModal')?.addEventListener('click', () => {
+    document.getElementById('mentorApplicationModal')?.classList.add('hidden');
+  });
+
 
   const { data: session } = await supabase.auth.getSession();
   const user = session?.session?.user;
@@ -220,7 +263,7 @@ function renderAddMentorCard() {
       <i class="fa fa-user-plus fa-2x" style="color:#0ea5e9;margin-bottom:1rem;"></i>
       <h3>Find New Mentor</h3>
       <p>Look for a mentor who aligns with your learning goals</p>
-      <button class="btn btn-primary full-width" onclick="openMentorFinder()">Find Mentors</button>
+      <button class="btn btn-primary full-width" onclick="openMentorFinder()">Submit Request</button>
     </div>`;
 }
 
