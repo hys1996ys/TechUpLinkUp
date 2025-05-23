@@ -63,6 +63,13 @@
     </section>
     <section class="mentor-cta">
       <div class="cta-text">
+        <h1>Pending Applications</h1>
+        <p>Your submitted mentorship applications</p>
+      </div>
+      <div class="scroll-container mentee-applications"></div>
+    </section>
+    <section class="mentor-cta">
+      <div class="cta-text">
         <h1>Mentor Recommendations</h1>
         <p>Recommendations</p>
       </div>
@@ -168,13 +175,62 @@ document.addEventListener('DOMContentLoaded', async () => {
       alert('Application submitted successfully.');
       mentorApplicationForm.reset();
       document.getElementById('mentorApplicationModal')?.classList.add('hidden');
+      // Switch to mentee view after submission
+      mentorView.classList.add('hidden');
+      menteeView.classList.remove('hidden');
+      menteeBtn.classList.add('active');
+      mentorBtn.classList.remove('active');
+      await loadMenteeApplications();
       reloadRecommendations();
     }
   });
 
   await loadMentorAndMenteeViews();
+  await loadMenteeApplications();
   await reloadRecommendations();
 });
+
+async function loadMenteeApplications() {
+  const { data: session } = await supabase.auth.getSession();
+  const user = session?.session?.user;
+
+
+  if (!user) {console.log("User not logged in"); return;} else{ console.log("User logged in" + user.id);}  
+
+  const { data: applications, error } = await supabase
+    .from('mentor_applications')
+    .select('*')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false });
+
+  const container = document.querySelector('.scroll-container.mentee-applications');
+  container.innerHTML = '';
+console.log(applications);
+
+
+  if (error) {
+    container.innerHTML = '<div class="error">Failed to load applications.</div>';
+    return;
+  }
+
+  if (!applications || applications.length === 0) {
+    container.innerHTML = '<div class="empty">No pending applications.</div>';
+    return;
+  }
+
+  applications.forEach(app => {
+    const div = document.createElement('div');
+    div.className = 'application-card';
+    div.innerHTML = `
+      <strong>Learning Outcome:</strong> ${app.learning_outcome}<br>
+      <strong>Skills:</strong> ${app.skills?.join(', ')}<br>
+      <strong>Learning Styles:</strong> ${app.learning_style?.join(', ')}<br>
+      <strong>Communication Modes:</strong> ${app.comm_mode?.join(', ')}<br>
+      <small>Submitted: ${new Date(app.created_at).toLocaleString()}</small>
+    `;
+    container.appendChild(div);
+  });
+}
 </script>
 
 

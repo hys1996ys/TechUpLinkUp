@@ -1,5 +1,6 @@
 // mentorshipLogic.js
 
+// Renders a mentor or mentee profile card with badges, name, designation, and a match score bar if isPending = true.
 function renderCard(profile, score, isPending = false) {
   const initials = profile?.name?.charAt(0)?.toUpperCase() || 'U';
   const skills = (profile.skills || []).map(skill => `<span class="badge">${skill}</span>`).join('');
@@ -25,6 +26,7 @@ function renderCard(profile, score, isPending = false) {
     </div>`;
 }
 
+// Renders a card with a "Find Mentees" button when the mentor has fewer than 3 active mentees.
 function renderAddMenteeCard() {
   return `
     <div class="mentee-card" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;">
@@ -35,6 +37,7 @@ function renderAddMenteeCard() {
     </div>`;
 }
 
+//Renders a disabled card saying the mentee limit (3) has been reached.
 function renderMenteeLimitReachedCard() {
   return `
     <div class="mentee-card" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;opacity:0.6;">
@@ -45,6 +48,7 @@ function renderMenteeLimitReachedCard() {
     </div>`;
 }
 
+// Renders a card prompting the user to submit a request to find a mentor.
 function renderAddMentorCard() {
   return `
     <div class="mentee-card" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;">
@@ -55,6 +59,7 @@ function renderAddMentorCard() {
     </div>`;
 }
 
+// Renders a disabled card if the mentee already has 3 mentors.
 function renderMentorLimitReachedCard() {
   return `
     <div class="mentee-card" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;opacity:0.6;">
@@ -72,6 +77,8 @@ function openMenteeFinder() {
 function openMentorFinder() {
   document.getElementById('mentorApplicationModal')?.classList.remove('hidden');
 }
+
+// Loads and renders: Active & pending mentees (for mentors/ mentees)
 
 async function loadMentorAndMenteeViews() {
   const { data: session } = await supabase.auth.getSession();
@@ -117,6 +124,7 @@ function computeCompatibility(app, mentor) {
   return Math.min(100, (s + l + c) * 20);
 }
 
+// Shows a mentor application along with 1–3 compatible mentors with buttons to request or cancel mentorship.
 function renderRecommendation(app, matches) {
   return `
     <div class="mentee-card" style="margin-bottom:2rem;padding:1rem;border:1px solid #ddd;border-radius:8px;">
@@ -135,6 +143,8 @@ function renderRecommendation(app, matches) {
         </div>`).join('')}
     </div>`;
 }
+
+// Loads all mentor_applications by the logged-in user, finds mentors who are accepting applications, scores compatibility, ranks them, and displays recommendations using renderRecommendation.
 
 async function reloadRecommendations() {
   const { data: session } = await supabase.auth.getSession();
