@@ -146,28 +146,55 @@ function renderRecommendation(app, matches) {
 
 // Loads all mentor_applications by the logged-in user, finds mentors who are accepting applications, scores compatibility, ranks them, and displays recommendations using renderRecommendation.
 
-async function reloadRecommendations() {
-  const { data: session } = await supabase.auth.getSession();
-  const user = session?.session?.user;
-  if (!user) return;
+async function loadRecommendationsForApplication(app) {
+  // Example: fetch mentors matching the skills, learning_style, comm_mode of the application
+  // You may need to adjust the table/column names to fit your schema
+  const { data: mentors, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .overlaps('skills', app.skills)
+    .overlaps('learning_style', app.learning_style)
+    .overlaps('comm_mode', app.comm_mode);
 
-  const pendingContainer = document.querySelector('.scroll-container.mentee-pending');
-  if (!pendingContainer) return;
-  pendingContainer.innerHTML = '';
+  const container = document.querySelector('.scroll-container.mentee-pending');
+  container.innerHTML = '';
 
-  const { data: applications } = await supabase.from('mentor_applications').select('*').eq('user_id', user.id);
-  const { data: mentors } = await supabase.from('profiles').select('*').eq('accepting_applications', true);
-
-  for (const app of applications || []) {
-    const ranked = mentors.map(m => ({ ...m, score: computeCompatibility(app, m) }))
-                          .sort((a, b) => b.score - a.score)
-                          .slice(0, 3);
-    if (ranked.length > 0) {
-      pendingContainer.innerHTML += renderRecommendation(app, ranked);
-    } else {
-      pendingContainer.innerHTML += `<div class='mentee-card'><p>No compatible mentors found for: ${app.learning_outcome}</p></div>`;
-    }
+  if (error) {
+    container.innerHTML = '<div class="error">Failed to load recommendations.</div>';
+    return;
   }
+
+  if (!mentors || mentors.length === 0) {
+    container.innerHTML = '<div class="empty">No mentor recommendations found for this application.</div>';
+    return;
+  }
+
+  mentors.forEach(mentor => {
+    // Calculate compatibility score if not already present
+    let score = mentor.score;
+    if (typeof score !== 'number' && typeof computeCompatibility === 'function') {
+      score = computeCompatibility(app, mentor);
+    }
+
+    const div = document.createElement('div');
+    div.className = 'application-card';
+    div.innerHTML = `
+      <strong>Name:</strong>
+      <h3>${mentor.name}</h3>
+      <strong>Description:</strong>
+      <div><em>${mentor.description || ''}</em></div>
+      <strong>Compatibility:</strong>
+      <div class="compat-label">${score || 0}% Match</div>
+      <strong>Skills:</strong>
+      <div class="badge-group">${(mentor.skills || []).map(skill => `<span class="badge">${skill}</span>`).join('')}</div>
+      <strong>Learning Styles:</strong>
+      <div class="badge-group">${(mentor.learning_style || []).map(style => `<span class="badge">${style}</span>`).join('')}</div>
+      <strong>Comm Modes:</strong>
+      <div class="badge-group">${(mentor.comm_mode || []).map(mode => `<span class="badge">${mode}</span>`).join('')}</div>
+      <button class="btn btn-primary">Request Mentorship</button>
+    `;
+    container.appendChild(div);
+  });
 }
 
 async function requestMentorship(appId, mentorId, btn) {
@@ -220,5 +247,21 @@ async function cancelMentorship(mentorId, btn) {
   } else {
     alert("Request canceled.");
     reloadRecommendations();
+  }
+}
+
+function highlightSelectedApplication(selectedDiv) {
+  document.querySelectorAll('.scroll-container.mentee-applications .application-card')
+    .forEach(card => card.classList.remove('selected'));
+  selectedDiv.classList.add('selected');
+}
+
+// After applications.forEach in loadMenteeApplications
+// On page load, show recommendations for the first application (optional)
+if (applications.length > 0) {
+  const firstCard = container.querySelector('.application-card');
+  if (firstCard) {
+    highlightSelectedApplication(firstCard);
+    loadRecommendationsForApplication(applications[0]);
   }
 }

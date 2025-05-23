@@ -766,3 +766,92 @@ select[multiple] {
   border: 1px solid #d1d5db;
   background-color: #fff;
 }
+
+/* Application Card */
+.application-card {
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1.5rem;
+  width: 300px;
+  flex-shrink: 0;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.application-card h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.application-card strong {
+  display: block;
+  margin-bottom: 0.25rem;
+  color: #007bff;
+}
+
+.application-card .badge-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 0.25rem;
+}
+
+.application-card .badge {
+  background-color: #e6f0ff;
+  color: #007bff;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+}
+
+.application-card .compat-label {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #007bff;
+}
+
+.application-card .compat-bar {
+  background: #e2e8f0;
+  border-radius: 4px;
+  overflow: hidden;
+  height: 6px;
+}
+
+.application-card .compat-fill {
+  height: 100%;
+  background: #0ea5e9;
+}
+
+.application-card small {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.application-card .btn-primary {
+  width: 100%;
+  margin-top: 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
+
+.application-card.selected {
+  border: 2px solid #007bff;
+  background: #f0f8ff;
+}
+
+/* Add spacing between mentorship sections */
+.mentor-cta + .mentor-cta {
+  margin-top: 2rem;
+}
