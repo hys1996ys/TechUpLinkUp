@@ -111,13 +111,15 @@
 
 
 <script>
-document.addEventListener('DOMContentLoaded', async () => {
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+document.addEventListener('DOMContentLoaded', async () => {
   const mentorBtn = document.getElementById('mentorViewBtn');
   const menteeBtn = document.getElementById('menteeViewBtn');
   const mentorView = document.getElementById('mentorView');
   const menteeView = document.getElementById('menteeView');
+  const mentorApplicationForm = document.getElementById('mentorApplicationForm');
+  const closeMentorModal = document.getElementById('closeMentorModal');
 
   mentorBtn.addEventListener('click', () => {
     mentorView.classList.remove('hidden');
@@ -133,11 +135,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     mentorBtn.classList.remove('active');
   });
 
-    // Mentor Application Submission Handler
-  const mentorApplicationForm = document.getElementById('mentorApplicationForm');
+  closeMentorModal?.addEventListener('click', () => {
+    document.getElementById('mentorApplicationModal')?.classList.add('hidden');
+  });
+
   mentorApplicationForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
-
     const { data: session } = await supabase.auth.getSession();
     const user = session?.session?.user;
     if (!user) {
@@ -145,7 +148,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
-    const learningOutcome = document.getElementById('learningOutcome').value;
+    const learningOutcome = document.getElementById('learningOutcome')?.value;
     const skills = Array.from(document.getElementById('appSkills').selectedOptions).map(opt => opt.value);
     const learningStyles = Array.from(document.getElementById('appLearningStyles').selectedOptions).map(opt => opt.value);
     const commModes = Array.from(document.getElementById('appCommModes').selectedOptions).map(opt => opt.value);
@@ -153,149 +156,29 @@ document.addEventListener('DOMContentLoaded', async () => {
     const { error } = await supabase.from('mentor_applications').insert({
       user_id: user.id,
       learning_outcome: learningOutcome,
-      skills: skills,
+      skills,
       learning_style: learningStyles,
       comm_mode: commModes
     });
 
     if (error) {
-      console.error("Submission failed", error);
-      alert("There was an error submitting your application.");
+      alert('Application submission failed.');
+      console.error(error);
     } else {
-      alert("Application submitted successfully!");
-      document.getElementById('mentorApplicationModal')?.classList.add('hidden');
+      alert('Application submitted successfully.');
       mentorApplicationForm.reset();
+      document.getElementById('mentorApplicationModal')?.classList.add('hidden');
+      reloadRecommendations();
     }
   });
 
-  document.getElementById('closeMentorModal')?.addEventListener('click', () => {
-    document.getElementById('mentorApplicationModal')?.classList.add('hidden');
-  });
-
-
-  const { data: session } = await supabase.auth.getSession();
-  const user = session?.session?.user;
-  if (!user) return;
-
-  // Load Mentor View
-  const { data: mentorships } = await supabase
-    .from('mentorships')
-    .select(`mentee_id, status, compatibility_score, mentee:profiles!mentorships_mentee_id_fkey (id, name, designation, skills, learning_goals)`)
-    .eq('mentor_id', user.id);
-
-  const activeMentees = mentorships?.filter(m => m.status === 'active').slice(0, 3) || [];
-  const pendingMentees = mentorships?.filter(m => m.status === 'pending')?.sort((a, b) => b.compatibility_score - a.compatibility_score) || [];
-
-  const activeContainer = document.querySelector('.scroll-container.active');
-  const pendingContainer = document.querySelector('.scroll-container.pending');
-
-  activeContainer.innerHTML = activeMentees.map(m => renderCard(m.mentee, null, false)).join('');
-  activeContainer.innerHTML += activeMentees.length < 3 ? renderAddMenteeCard() : renderMenteeLimitReachedCard();
-  pendingContainer.innerHTML = pendingMentees.map(m => renderCard(m.mentee, m.compatibility_score, true)).join('');
-
-  // Load Mentee View
-  const { data: menteeMentorships } = await supabase
-    .from('mentorships')
-    .select(`mentor_id, status, compatibility_score, mentor:profiles!mentorships_mentor_id_fkey (id, name, designation, skills, learning_style)`)
-    .eq('mentee_id', user.id);
-
-  const myMentors = menteeMentorships?.filter(m => m.status === 'active').slice(0, 3) || [];
-  const myPending = menteeMentorships?.filter(m => m.status === 'pending') || [];
-
-  const menteeActiveContainer = document.querySelector('.scroll-container.mentee-active');
-  const menteePendingContainer = document.querySelector('.scroll-container.mentee-pending');
-
-  menteeActiveContainer.innerHTML = myMentors.map(m => renderCard(m.mentor, null, false)).join('');
-  menteeActiveContainer.innerHTML += myMentors.length < 3 ? renderAddMentorCard() : renderMentorLimitReachedCard();
-
-  menteePendingContainer.innerHTML = myPending.map(m => renderCard(m.mentor, m.compatibility_score, true)).join('');
+  await loadMentorAndMenteeViews();
+  await reloadRecommendations();
 });
-
-// Utility card renderers (RE-USE YOUR EXISTING ONES)
-function renderCard(profile, score, isPending = false) {
-  const initials = profile?.name?.charAt(0)?.toUpperCase() || 'U';
-  const skills = (profile.skills || []).map(skill => `<span class="badge">${skill}</span>`).join('');
-  const goals = (profile.learning_goals || profile.learning_style || []).map(g => `<span class="badge">${g}</span>`).join('');
-  const matchBar = isPending
-    ? `<div class="compat-label">${score}% Match</div><div class="compat-bar"><div class="compat-fill" style="width: ${score}%;"></div></div>`
-    : '';
-  const actionBtn = isPending
-    ? `<button class="btn btn-success full-width" onclick="acceptMentee('${profile.id}')">Accept</button>`
-    : `<button class="btn full-width"><i class="fa fa-eye"></i> View Profile</button>`;
-
-  return `
-    <div class="mentee-card">
-      <div class="avatar-circle-sm">${initials}</div>
-      <h3>${profile.name}</h3>
-      <p>${profile.designation || ''}</p>
-      ${matchBar}
-      <strong>Learning Goals</strong>
-      <div class="badge-group">${goals}</div>
-      <strong>Skills</strong>
-      <div class="badge-group">${skills}</div>
-      ${actionBtn}
-    </div>`;
-}
-
-function renderAddMenteeCard() {
-  return `
-    <div class="mentee-card" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;">
-      <i class="fa fa-user-plus fa-2x" style="color:#0ea5e9;margin-bottom:1rem;"></i>
-      <h3>Add New Mentee</h3>
-      <p>Invite someone new to learn under your guidance</p>
-      <button class="btn btn-primary full-width" onclick="openMenteeFinder()">Find Mentees</button>
-    </div>`;
-}
-
-function renderMenteeLimitReachedCard() {
-  return `
-    <div class="mentee-card" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;opacity:0.6;">
-      <i class="fa fa-user-lock fa-2x" style="color:#9ca3af;margin-bottom:1rem;"></i>
-      <h3>Mentee Limit Reached</h3>
-      <p>You already have 3 active mentees</p>
-      <button class="btn full-width" disabled>Limit Reached</button>
-    </div>`;
-}
-
-function renderAddMentorCard() {
-  return `
-    <div class="mentee-card" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;">
-      <i class="fa fa-user-plus fa-2x" style="color:#0ea5e9;margin-bottom:1rem;"></i>
-      <h3>Find New Mentor</h3>
-      <p>Look for a mentor who aligns with your learning goals</p>
-      <button class="btn btn-primary full-width" onclick="openMentorFinder()">Submit Request</button>
-    </div>`;
-}
-
-function renderMentorLimitReachedCard() {
-  return `
-    <div class="mentee-card" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;opacity:0.6;">
-      <i class="fa fa-user-lock fa-2x" style="color:#9ca3af;margin-bottom:1rem;"></i>
-      <h3>Mentor Limit Reached</h3>
-      <p>You already have 3 active mentors</p>
-      <button class="btn full-width" disabled>Limit Reached</button>
-    </div>`;
-}
-
-function openMenteeFinder() {
-  window.location.href = "discover.html#mentees";
-}
-
-function openMentorFinder() {
-  const modal = document.getElementById('mentorApplicationModal');
-  modal.classList.remove('hidden');
- 
-}
-
-
-
-document.getElementById('closeMentorModal').addEventListener('click', () => {
-  const modal = document.getElementById('mentorApplicationModal');
-  modal.classList.add('hidden');
-});
-
-
-
 </script>
+
+
+<script src="mentorshipLogic.js"></script>
+
 </body>
 </html>

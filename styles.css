@@ -664,9 +664,9 @@ textarea.profile-input {
   cursor: pointer;
 }
 .toggle-btn.active {
-  background: #0ea5e9;
+  background: #007bff;
   color: white;
-  border-color: #0ea5e9;
+  border-color: #007bff;
 }
  
 /* Modal Container */
