@@ -170,7 +170,6 @@ async function loadRecommendationsForApplication(app) {
   }
 
   mentors.forEach(mentor => {
-    // Calculate compatibility score if not already present
     let score = mentor.score;
     if (typeof score !== 'number' && typeof computeCompatibility === 'function') {
       score = computeCompatibility(app, mentor);
@@ -180,17 +179,17 @@ async function loadRecommendationsForApplication(app) {
     div.className = 'application-card';
     div.innerHTML = `
       <strong>Name:</strong>
-      <h3>${mentor.name}</h3>
+      <h3 style="font-weight: 400; color: #0f172a; margin: 0;">${mentor.name}</h3>
       <strong>Description:</strong>
       <div><em>${mentor.description || ''}</em></div>
       <strong>Compatibility:</strong>
       <div class="compat-label">${score || 0}% Match</div>
       <strong>Skills:</strong>
-      <div class="badge-group">${(mentor.skills || []).map(skill => `<span class="badge">${skill}</span>`).join('')}</div>
+      <div>${(mentor.skills || []).join(', ')}</div>
       <strong>Learning Styles:</strong>
-      <div class="badge-group">${(mentor.learning_style || []).map(style => `<span class="badge">${style}</span>`).join('')}</div>
-      <strong>Comm Modes:</strong>
-      <div class="badge-group">${(mentor.comm_mode || []).map(mode => `<span class="badge">${mode}</span>`).join('')}</div>
+      <div>${(mentor.learning_style || []).join(', ')}</div>
+      <strong>Communication Modes:</strong>
+      <div>${(mentor.comm_mode || []).join(', ')}</div>
       <button class="btn btn-primary">Request Mentorship</button>
     `;
     container.appendChild(div);

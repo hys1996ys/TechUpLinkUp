@@ -780,6 +780,7 @@ select[multiple] {
   flex-direction: column;
   gap: 0.5rem;
   font-size: 0.95rem;
+  font-family: inherit;  /*/ (optional, if you want to inherit from body) */
 }
 
 .application-card h3 {
@@ -855,3 +856,4 @@ select[multiple] {
 .mentor-cta + .mentor-cta {
   margin-top: 2rem;
 }
+
