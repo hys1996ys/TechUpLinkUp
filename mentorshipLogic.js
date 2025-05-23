@@ -291,5 +291,65 @@ function highlightSelectedApplication(selectedDiv) {
 
 // Initial load
 document.addEventListener('DOMContentLoaded', () => {
-  loadMentorAndMenteeViews();
+  loadMenteeApplications();
 });
+
+// After fetching applications and mentorships:
+async function loadMenteeApplications() {
+  const { data: session } = await supabase.auth.getSession();
+  const user = session?.session?.user;
+  if (!user) return;
+
+  // Fetch applications
+  const { data: applications, error: appError } = await supabase
+    .from('mentor_applications')
+    .select('*')
+    .eq('user_id', user.id);
+
+  // Fetch mentorships
+  const { data: myMentorships, error: mentorError } = await supabase
+    .from('mentorships')
+    .select('mentor_id, application_id, status')
+    .eq('mentee_id', user.id);
+
+  if (appError || mentorError) return;
+
+  const pending = [];
+  const inactive = [];
+
+  applications.forEach(app => {
+    // Find if this application has an active mentorship
+    const activeMentorship = myMentorships?.find(
+      m => m.application_id === app.id && m.status === 'active'
+    );
+
+    const div = document.createElement('div');
+    div.className = 'application-card';
+    if (activeMentorship) {
+      div.classList.add('inactive');
+    }
+    div.setAttribute('data-app-id', app.id);
+    div.innerHTML = `
+      <strong>Learning Outcome:</strong> ${app.learning_outcome}<br>
+      <strong>Skills:</strong> ${app.skills?.join(', ')}<br>
+      <strong>Learning Styles:</strong> ${app.learning_style?.join(', ')}<br>
+      <strong>Communication Modes:</strong> ${app.comm_mode?.join(', ')}<br>
+      <small>Submitted: ${new Date(app.created_at).toLocaleString()}</small>
+    `;
+    if (activeMentorship) {
+      inactive.push(div);
+    } else {
+      div.addEventListener('click', () => {
+        highlightSelectedApplication(div);
+        loadRecommendationsForApplication(app);
+      });
+      pending.push(div);
+    }
+  });
+
+  // Render pending first, then inactive (greyed out) at the back
+  const container = document.querySelector('.scroll-container.mentee-applications');
+  container.innerHTML = '';
+  pending.forEach(div => container.appendChild(div));
+  inactive.forEach(div => container.appendChild(div));
+}
