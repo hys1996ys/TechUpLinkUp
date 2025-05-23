@@ -1,15 +1,16 @@
 // mentorshipLogic.js
 
-// Renders a mentor or mentee profile card with badges, name, designation, and a match score bar if isPending = true.
-function renderCard(profile, score, isPending = false) {
+// Renders a mentor or mentee profile card
+function renderCard(profile, score, isPending = false, mentorshipId = null) {
   const initials = profile?.name?.charAt(0)?.toUpperCase() || 'U';
   const skills = (profile.skills || []).map(skill => `<span class="badge">${skill}</span>`).join('');
   const goals = (profile.learning_goals || profile.learning_style || []).map(g => `<span class="badge">${g}</span>`).join('');
-  const matchBar = isPending
+  const matchBar = isPending && score !== null && score !== undefined
     ? `<div class="compat-label">${score}% Match</div><div class="compat-bar"><div class="compat-fill" style="width: ${score}%;"></div></div>`
     : '';
-  const actionBtn = isPending
-    ? `<button class="btn btn-success full-width" onclick="acceptMentee('${profile.id}')">Accept</button>`
+  const actionBtn = isPending && mentorshipId
+    ? `<button class="btn btn-success full-width" onclick="acceptMentee('${mentorshipId}', this)">Accept</button>
+       <button class="btn btn-danger full-width" onclick="rejectMentee('${mentorshipId}', this)">Reject</button>`
     : `<button class="btn full-width"><i class="fa fa-eye"></i> View Profile</button>`;
 
   return `
@@ -26,7 +27,7 @@ function renderCard(profile, score, isPending = false) {
     </div>`;
 }
 
-// Renders a card with a "Find Mentees" button when the mentor has fewer than 3 active mentees.
+// Add/limit cards for mentors/mentees
 function renderAddMenteeCard() {
   return `
     <div class="mentee-card" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;">
@@ -36,8 +37,6 @@ function renderAddMenteeCard() {
       <button class="btn btn-primary full-width" onclick="openMenteeFinder()">Find Mentees</button>
     </div>`;
 }
-
-//Renders a disabled card saying the mentee limit (3) has been reached.
 function renderMenteeLimitReachedCard() {
   return `
     <div class="mentee-card" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;opacity:0.6;">
@@ -47,8 +46,6 @@ function renderMenteeLimitReachedCard() {
       <button class="btn full-width" disabled>Limit Reached</button>
     </div>`;
 }
-
-// Renders a card prompting the user to submit a request to find a mentor.
 function renderAddMentorCard() {
   return `
     <div class="mentee-card" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;">
@@ -58,8 +55,6 @@ function renderAddMentorCard() {
       <button class="btn btn-primary full-width" onclick="openMentorFinder()">Submit Request</button>
     </div>`;
 }
-
-// Renders a disabled card if the mentee already has 3 mentors.
 function renderMentorLimitReachedCard() {
   return `
     <div class="mentee-card" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;opacity:0.6;">
@@ -73,21 +68,20 @@ function renderMentorLimitReachedCard() {
 function openMenteeFinder() {
   window.location.href = "discover.html#mentees";
 }
-
 function openMentorFinder() {
   document.getElementById('mentorApplicationModal')?.classList.remove('hidden');
 }
 
 // Loads and renders: Active & pending mentees (for mentors/ mentees)
-
 async function loadMentorAndMenteeViews() {
   const { data: session } = await supabase.auth.getSession();
   const user = session?.session?.user;
   if (!user) return;
 
+  // Mentor's mentees
   const { data: mentorships } = await supabase
     .from('mentorships')
-    .select(`mentee_id, status, compatibility_score, mentee:profiles!mentorships_mentee_id_fkey (id, name, designation, skills, learning_goals)`)
+    .select(`id, mentee_id, status, compatibility_score, mentee:profiles!mentorships_mentee_id_fkey (id, name, designation, skills, learning_goals)`)
     .eq('mentor_id', user.id);
 
   const activeMentees = mentorships?.filter(m => m.status === 'active').slice(0, 3) || [];
@@ -98,11 +92,12 @@ async function loadMentorAndMenteeViews() {
     (activeMentees.length < 3 ? renderAddMenteeCard() : renderMenteeLimitReachedCard());
 
   document.querySelector('.scroll-container.pending').innerHTML =
-    pendingMentees.map(m => renderCard(m.mentee, m.compatibility_score, true)).join('');
+    pendingMentees.map(m => renderCard(m.mentee, m.compatibility_score, true, m.id)).join('');
 
+  // Mentee's mentors
   const { data: menteeMentorships } = await supabase
     .from('mentorships')
-    .select(`mentor_id, status, compatibility_score, mentor:profiles!mentorships_mentor_id_fkey (id, name, designation, skills, learning_style)`)
+    .select(`id, mentor_id, status, compatibility_score, mentor:profiles!mentorships_mentor_id_fkey (id, name, designation, skills, learning_style)`)
     .eq('mentee_id', user.id);
 
   const myMentors = menteeMentorships?.filter(m => m.status === 'active').slice(0, 3) || [];
@@ -113,48 +108,64 @@ async function loadMentorAndMenteeViews() {
     (myMentors.length < 3 ? renderAddMentorCard() : renderMentorLimitReachedCard());
 
   document.querySelector('.scroll-container.mentee-pending').innerHTML =
-    myPending.map(m => renderCard(m.mentor, m.compatibility_score, true)).join('');
+    myPending.map(m => renderCard(m.mentor, m.compatibility_score, true, m.id)).join('');
 }
 
-function computeCompatibility(app, mentor) {
-  const overlap = (a, b) => a.filter(x => b.includes(x));
-  const s = overlap(app.skills, mentor.skills).length;
-  const l = overlap(app.learning_style, mentor.learning_style).length;
-  const c = overlap(app.comm_mode, mentor.comm_mode).length;
-  return Math.min(100, (s + l + c) * 20);
+// Accept/reject mentee requests (mentor side)
+async function acceptMentee(mentorshipId, btn) {
+  btn.disabled = true;
+  const { error } = await supabase
+    .from('mentorships')
+    .update({ status: 'active' })
+    .eq('id', mentorshipId);
+
+  if (error) {
+    alert("Failed to accept mentee.");
+    btn.disabled = false;
+  } else {
+    btn.textContent = 'Accepted';
+    btn.classList.remove('btn-success');
+    btn.classList.add('btn-secondary');
+    loadMentorAndMenteeViews();
+  }
+}
+async function rejectMentee(mentorshipId, btn) {
+  btn.disabled = true;
+  const { error } = await supabase
+    .from('mentorships')
+    .update({ status: 'rejected' })
+    .eq('id', mentorshipId);
+
+  if (error) {
+    alert("Failed to reject mentee.");
+    btn.disabled = false;
+  } else {
+    btn.textContent = 'Rejected';
+    btn.classList.remove('btn-danger');
+    btn.classList.add('btn-secondary');
+    loadMentorAndMenteeViews();
+  }
 }
 
-// Shows a mentor application along with 1–3 compatible mentors with buttons to request or cancel mentorship.
-function renderRecommendation(app, matches) {
-  return `
-    <div class="mentee-card" style="margin-bottom:2rem;padding:1rem;border:1px solid #ddd;border-radius:8px;">
-      <h3>Application: ${app.learning_outcome}</h3>
-      <p><strong>Skills:</strong> ${app.skills.map(s => `<span class="badge">${s}</span>`).join(' ')}</p>
-      <p><strong>Learning Style:</strong> ${app.learning_style.map(s => `<span class="badge">${s}</span>`).join(' ')}</p>
-      <p><strong>Comm Mode:</strong> ${app.comm_mode.map(s => `<span class="badge">${s}</span>`).join(' ')}</p>
-      <hr/>
-      ${matches.map(mentor => `
-        <div style="margin:0.5rem 0;padding:0.5rem;border-bottom:1px dashed #ccc;">
-          <strong>${mentor.name}</strong> - ${mentor.score}% Match<br>
-          <small>${mentor.designation}</small><br>
-          <span>Skills: ${mentor.skills.map(s => `<span class='badge'>${s}</span>`).join(' ')}</span><br>
-          <button class="btn btn-primary small" onclick="requestMentorship('${app.id}', '${mentor.id}', this)">Request Mentorship</button>
-          <button class="btn btn-danger small hidden" onclick="cancelMentorship('${mentor.id}', this)">Cancel Request</button>
-        </div>`).join('')}
-    </div>`;
-}
-
-// Loads all mentor_applications by the logged-in user, finds mentors who are accepting applications, scores compatibility, ranks them, and displays recommendations using renderRecommendation.
-
+// Mentor recommendations for a mentee application (separate section)
 async function loadRecommendationsForApplication(app) {
-  // Example: fetch mentors matching the skills, learning_style, comm_mode of the application
-  // You may need to adjust the table/column names to fit your schema
+  const { data: session } = await supabase.auth.getSession();
+  const user = session?.session?.user;
+  if (!user) return;
+
+  // Fetch mentors matching the application
   const { data: mentors, error } = await supabase
     .from('profiles')
     .select('*')
     .overlaps('skills', app.skills)
     .overlaps('learning_style', app.learning_style)
     .overlaps('comm_mode', app.comm_mode);
+
+  // Fetch existing mentorships for this mentee
+  const { data: myMentorships } = await supabase
+    .from('mentorships')
+    .select('mentor_id, application_id, status')
+    .eq('mentee_id', user.id);
 
   const container = document.querySelector('.scroll-container.mentee-pending');
   container.innerHTML = '';
@@ -170,10 +181,23 @@ async function loadRecommendationsForApplication(app) {
   }
 
   mentors.forEach(mentor => {
-    let score = mentor.score;
-    if (typeof score !== 'number' && typeof computeCompatibility === 'function') {
-      score = computeCompatibility(app, mentor);
-    }
+    let score = typeof mentor.score === 'number'
+      ? mentor.score
+      : (typeof computeCompatibility === 'function' ? computeCompatibility(app, mentor) : 0);
+
+    // Check if a mentorship already exists with this mentor
+    const existing = myMentorships?.find(
+      m => m.mentor_id === mentor.id && m.application_id === app.id
+    );
+
+    let btnHtml = '';
+ if (existing && existing.status === 'pending') {
+  btnHtml = `<button class="btn btn-success" disabled>Request Sent</button>`;
+} else if (existing && existing.status === 'active') {
+  btnHtml = `<button class="btn btn-secondary" disabled>Mentorship Active</button>`;
+} else {
+  btnHtml = `<button class="btn btn-primary" onclick="requestMentorship('${app.id}', '${mentor.id}', this)">Request Mentorship</button>`;
+}
 
     const div = document.createElement('div');
     div.className = 'application-card';
@@ -190,12 +214,13 @@ async function loadRecommendationsForApplication(app) {
       <div>${(mentor.learning_style || []).join(', ')}</div>
       <strong>Communication Modes:</strong>
       <div>${(mentor.comm_mode || []).join(', ')}</div>
-      <button class="btn btn-primary">Request Mentorship</button>
+      ${btnHtml}
     `;
     container.appendChild(div);
   });
 }
 
+// Request/cancel mentorship (mentee side)
 async function requestMentorship(appId, mentorId, btn) {
   const { data: session } = await supabase.auth.getSession();
   const user = session?.session?.user;
@@ -207,6 +232,7 @@ async function requestMentorship(appId, mentorId, btn) {
   const { error } = await supabase.from('mentorships').insert({
     mentee_id: user.id,
     mentor_id: mentorId,
+    application_id: appId, // <-- add this
     status: 'pending',
     compatibility_score: 0
   });
@@ -217,12 +243,9 @@ async function requestMentorship(appId, mentorId, btn) {
     btn.disabled = false;
     btn.textContent = 'Request Mentorship';
   } else {
-    btn.textContent = 'Request Sent ✅';
-    btn.classList.remove('btn-primary');
-    btn.classList.add('btn-success');
-    const cancelBtn = btn.nextElementSibling;
-    cancelBtn.classList.remove('hidden');
-    reloadRecommendations();
+    loadMentorAndMenteeViews();
+    // Optionally reload recommendations if you want to update that section too
+    // loadRecommendationsForApplication(...);
   }
 }
 
@@ -245,8 +268,19 @@ async function cancelMentorship(mentorId, btn) {
     console.error(error);
   } else {
     alert("Request canceled.");
-    reloadRecommendations();
+    loadMentorAndMenteeViews();
+    // Optionally reload recommendations if you want to update that section too
+    // loadRecommendationsForApplication(...);
   }
+}
+
+// Utility: Compute compatibility score
+function computeCompatibility(app, mentor) {
+  const overlap = (a, b) => a.filter(x => b.includes(x));
+  const s = overlap(app.skills, mentor.skills).length;
+  const l = overlap(app.learning_style, mentor.learning_style).length;
+  const c = overlap(app.comm_mode, mentor.comm_mode).length;
+  return Math.min(100, (s + l + c) * 20);
 }
 
 function highlightSelectedApplication(selectedDiv) {
@@ -255,12 +289,7 @@ function highlightSelectedApplication(selectedDiv) {
   selectedDiv.classList.add('selected');
 }
 
-// After applications.forEach in loadMenteeApplications
-// On page load, show recommendations for the first application (optional)
-if (applications.length > 0) {
-  const firstCard = container.querySelector('.application-card');
-  if (firstCard) {
-    highlightSelectedApplication(firstCard);
-    loadRecommendationsForApplication(applications[0]);
-  }
-}
+// Initial load
+document.addEventListener('DOMContentLoaded', () => {
+  loadMentorAndMenteeViews();
+});
