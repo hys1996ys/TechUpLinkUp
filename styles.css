@@ -941,3 +941,8 @@ select[multiple] {
   pointer-events: none;
 }
 
+/* Ensure each card is the positioning context for its discard button */
+.application-card {
+  position: relative;
+}
+

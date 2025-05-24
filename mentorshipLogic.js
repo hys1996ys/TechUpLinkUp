@@ -385,15 +385,18 @@ async function loadRecommendationsForApplication(app, mentorIds = null) {
     let btnHtml = '';
 if (existing && existing.status === 'pending') {
   btnHtml = `
-    <button class="btn btn-success" disabled>Request Sent</button>
-    <button class="btn" onclick="handleWithdrawClick(this)">Withdraw</button>
-  `;
+  <button class="btn btn-success" disabled>Request Sent</button>
+  <button class="btn"
+    data-mentorship-id="${existing.id}"
+    data-app-id="${app.id}"
+    onclick="handleWithdrawClick(this)">Withdraw</button>
+`;
 } else if (existing && existing.status === 'active') {
   btnHtml = `<button class="btn btn-secondary" disabled>Mentorship Active</button>`;
 } else if (existing && existing.status === 'completed') {
   btnHtml = `<button class="btn btn-secondary" disabled>Completed</button>`; // ✅ Add this line
 } else {
-  btnHtml = `<button class="btn btn-primary" onclick='requestMentorship(...)'>Request Mentorship</button>`;
+  btnHtml = `<button class="btn btn-primary" onclick='requestMentorship("${app.id}", "${mentor.id}", this, ${JSON.stringify(app)})'>Request Mentorship</button>`;
 }
 
     const div = document.createElement('div');
@@ -547,15 +550,18 @@ async function loadRecommendationsForApplication(app, mentorIds = null) {
     let btnHtml = '';
 if (existing && existing.status === 'pending') {
   btnHtml = `
-    <button class="btn btn-success" disabled>Request Sent</button>
-    <button class="btn" onclick="handleWithdrawClick(this)">Withdraw</button>
-  `;
+  <button class="btn btn-success" disabled>Request Sent</button>
+  <button class="btn"
+    data-mentorship-id="${existing.id}"
+    data-app-id="${app.id}"
+    onclick="handleWithdrawClick(this)">Withdraw</button>
+`;
 } else if (existing && existing.status === 'active') {
   btnHtml = `<button class="btn btn-secondary" disabled>Mentorship Active</button>`;
 } else if (existing && existing.status === 'completed') {
   btnHtml = `<button class="btn btn-secondary" disabled>Completed</button>`; // ✅ Add this line
 } else {
-  btnHtml = `<button class="btn btn-primary" onclick='requestMentorship(...)'>Request Mentorship</button>`;
+  btnHtml = `<button class="btn btn-primary" onclick='requestMentorship("${app.id}", "${mentor.id}", this, ${JSON.stringify(app)})'>Request Mentorship</button>`;
 }
 
 
@@ -710,17 +716,19 @@ console.log('Filtered mentors:', filteredMentors);
 
     let btnHtml = '';
 if (existing && existing.status === 'pending') {
-  btnHtml = `
-    <button class="btn btn-success" disabled>Request Sent</button>
-    <button class="btn" onclick="handleWithdrawClick(this)">Withdraw</button>
-  `;
+ btnHtml = `
+  <button class="btn btn-success" disabled>Request Sent</button>
+  <button class="btn"
+    data-mentorship-id="${existing.id}"
+    data-app-id="${app.id}"
+    onclick="handleWithdrawClick(this)">Withdraw</button>
+`;
 } else if (existing && existing.status === 'active') {
   btnHtml = `<button class="btn btn-secondary" disabled>Mentorship Active</button>`;
 } else if (existing && existing.status === 'completed') {
   btnHtml = `<button class="btn btn-secondary" disabled>Completed</button>`; // ✅ Add this line
 } else {
-  btnHtml = `<button class="btn btn-primary" onclick='requestMentorship(...)'>Request Mentorship</button>`;
-}
+  btnHtml = `<button class="btn btn-primary" onclick='requestMentorship("${app.id}", "${mentor.id}", this, ${JSON.stringify(app)})'>Request Mentorship</button>`;}
 
 
     const div = document.createElement('div');
@@ -871,15 +879,18 @@ async function loadRecommendationsForApplication(app, mentorIds = null) {
     let btnHtml = '';
 if (existing && existing.status === 'pending') {
   btnHtml = `
-    <button class="btn btn-success" disabled>Request Sent</button>
-    <button class="btn" onclick="handleWithdrawClick(this)">Withdraw</button>
-  `;
+  <button class="btn btn-success" disabled>Request Sent</button>
+  <button class="btn"
+    data-mentorship-id="${existing.id}"
+    data-app-id="${app.id}"
+    onclick="handleWithdrawClick(this)">Withdraw</button>
+`;
 } else if (existing && existing.status === 'active') {
   btnHtml = `<button class="btn btn-secondary" disabled>Mentorship Active</button>`;
 } else if (existing && existing.status === 'completed') {
   btnHtml = `<button class="btn btn-secondary" disabled>Completed</button>`; // ✅ Add this line
 } else {
-  btnHtml = `<button class="btn btn-primary" onclick='requestMentorship(...)'>Request Mentorship</button>`;
+  btnHtml = `<button class="btn btn-primary" onclick='requestMentorship("${app.id}", "${mentor.id}", this, ${JSON.stringify(app)})'>Request Mentorship</button>`;
 }
 
 
@@ -1030,16 +1041,19 @@ async function loadRecommendationsForApplication(app, mentorIds = null) {
 
     let btnHtml = '';
 if (existing && existing.status === 'pending') {
-  btnHtml = `
-    <button class="btn btn-success" disabled>Request Sent</button>
-    <button class="btn" onclick="handleWithdrawClick(this)">Withdraw</button>
-  `;
+btnHtml = `
+  <button class="btn btn-success" disabled>Request Sent</button>
+  <button class="btn"
+    data-mentorship-id="${existing.id}"
+    data-app-id="${app.id}"
+    onclick="handleWithdrawClick(this)">Withdraw</button>
+`;
 } else if (existing && existing.status === 'active') {
   btnHtml = `<button class="btn btn-secondary" disabled>Mentorship Active</button>`;
 } else if (existing && existing.status === 'completed') {
   btnHtml = `<button class="btn btn-secondary" disabled>Completed</button>`; // ✅ Add this line
 } else {
-  btnHtml = `<button class="btn btn-primary" onclick='requestMentorship(...)'>Request Mentorship</button>`;
+  btnHtml = `<button class="btn btn-primary" onclick='requestMentorship("${app.id}", "${mentor.id}", this, ${JSON.stringify(app)})'>Request Mentorship</button>`;
 }
 
 
@@ -1190,16 +1204,19 @@ async function loadRecommendationsForApplication(app, mentorIds = null) {
 
     let btnHtml = '';
 if (existing && existing.status === 'pending') {
-  btnHtml = `
-    <button class="btn btn-success" disabled>Request Sent</button>
-    <button class="btn" onclick="handleWithdrawClick(this)">Withdraw</button>
-  `;
+ btnHtml = `
+  <button class="btn btn-success" disabled>Request Sent</button>
+  <button class="btn"
+    data-mentorship-id="${existing.id}"
+    data-app-id="${app.id}"
+    onclick="handleWithdrawClick(this)">Withdraw</button>
+`;
 } else if (existing && existing.status === 'active') {
   btnHtml = `<button class="btn btn-secondary" disabled>Mentorship Active</button>`;
 } else if (existing && existing.status === 'completed') {
   btnHtml = `<button class="btn btn-secondary" disabled>Completed</button>`; // ✅ Add this line
 } else {
-  btnHtml = `<button class="btn btn-primary" onclick='requestMentorship(...)'>Request Mentorship</button>`;
+  btnHtml = `<button class="btn btn-primary" onclick='requestMentorship("${app.id}", "${mentor.id}", this, ${JSON.stringify(app)})'>Request Mentorship</button>`;
 }
 
 
@@ -1350,16 +1367,19 @@ async function loadRecommendationsForApplication(app, mentorIds = null) {
 
     let btnHtml = '';
 if (existing && existing.status === 'pending') {
-  btnHtml = `
-    <button class="btn btn-success" disabled>Request Sent</button>
-    <button class="btn" onclick="handleWithdrawClick(this)">Withdraw</button>
-  `;
+btnHtml = `
+  <button class="btn btn-success" disabled>Request Sent</button>
+  <button class="btn"
+    data-mentorship-id="${existing.id}"
+    data-app-id="${app.id}"
+    onclick="handleWithdrawClick(this)">Withdraw</button>
+`;
 } else if (existing && existing.status === 'active') {
   btnHtml = `<button class="btn btn-secondary" disabled>Mentorship Active</button>`;
 } else if (existing && existing.status === 'completed') {
   btnHtml = `<button class="btn btn-secondary" disabled>Completed</button>`; // ✅ Add this line
 } else {
-  btnHtml = `<button class="btn btn-primary" onclick='requestMentorship(...)'>Request Mentorship</button>`;
+  btnHtml = `<button class="btn btn-primary" onclick='requestMentorship("${app.id}", "${mentor.id}", this, ${JSON.stringify(app)})'>Request Mentorship</button>`;
 }
 
 
@@ -1510,16 +1530,19 @@ async function loadRecommendationsForApplication(app, mentorIds = null) {
 
     let btnHtml = '';
 if (existing && existing.status === 'pending') {
-  btnHtml = `
-    <button class="btn btn-success" disabled>Request Sent</button>
-    <button class="btn" onclick="handleWithdrawClick(this)">Withdraw</button>
-  `;
+btnHtml = `
+  <button class="btn btn-success" disabled>Request Sent</button>
+  <button class="btn"
+    data-mentorship-id="${existing.id}"
+    data-app-id="${app.id}"
+    onclick="handleWithdrawClick(this)">Withdraw</button>
+`;
 } else if (existing && existing.status === 'active') {
   btnHtml = `<button class="btn btn-secondary" disabled>Mentorship Active</button>`;
 } else if (existing && existing.status === 'completed') {
   btnHtml = `<button class="btn btn-secondary" disabled>Completed</button>`; // ✅ Add this line
 } else {
-  btnHtml = `<button class="btn btn-primary" onclick='requestMentorship(...)'>Request Mentorship</button>`;
+  btnHtml = `<button class="btn btn-primary" onclick='requestMentorship("${app.id}", "${mentor.id}", this, ${JSON.stringify(app)})'>Request Mentorship</button>`;
 }
 
 
@@ -1670,16 +1693,19 @@ async function loadRecommendationsForApplication(app, mentorIds = null) {
 
     let btnHtml = '';
 if (existing && existing.status === 'pending') {
-  btnHtml = `
-    <button class="btn btn-success" disabled>Request Sent</button>
-    <button class="btn" onclick="handleWithdrawClick(this)">Withdraw</button>
-  `;
+btnHtml = `
+  <button class="btn btn-success" disabled>Request Sent</button>
+  <button class="btn"
+    data-mentorship-id="${existing.id}"
+    data-app-id="${app.id}"
+    onclick="handleWithdrawClick(this)">Withdraw</button>
+`;
 } else if (existing && existing.status === 'active') {
   btnHtml = `<button class="btn btn-secondary" disabled>Mentorship Active</button>`;
 } else if (existing && existing.status === 'completed') {
   btnHtml = `<button class="btn btn-secondary" disabled>Completed</button>`; // ✅ Add this line
 } else {
-  btnHtml = `<button class="btn btn-primary" onclick='requestMentorship(...)'>Request Mentorship</button>`;
+  btnHtml = `<button class="btn btn-primary" onclick='requestMentorship("${app.id}", "${mentor.id}", this, ${JSON.stringify(app)})'>Request Mentorship</button>`;
 }
 
 
@@ -1887,27 +1913,32 @@ async function loadMenteeApplications() {
   m => m.application_id === app.id && (m.status === 'active' || m.status === 'completed' || m.status === 'dissolved')
 );
 
-    const hasMentorship = !!(activeMentorship || completedMentorship);
+    const hasMentorRequest = myMentorships?.some(
+  m => m.application_id === app.id
+);
 
     // Discard button: always disabled for active/completed
-    const actionBtns = (hasMentorship || app.status === 'completed') ? `
-      <div style="position:absolute;top:0.5rem;right:0.5rem;z-index:2;">
-        <button class="btn btn-sm btn-danger"
-          style="padding:0.2rem 0.6rem;font-size:1.2rem;line-height:1;"
-          title="You cannot discard this application"
-          disabled
-        >&times;</button>
-      </div>
-    ` : `
-      <div style="position:absolute;top:0.5rem;right:0.5rem;z-index:2;">
-        <button class="btn btn-sm btn-danger"
-          style="padding:0.2rem 0.6rem;font-size:1.2rem;line-height:1;"
-          title="Discard"
-          onclick="discardApplication('${app.id}', this)"
-        >&times;</button>
-      </div>
-    `;
+    const hasActiveOrCompletedMentorship = myMentorships?.some(
+  m => m.application_id === app.id && (m.status === 'active' || m.status === 'completed')
+);
 
+const actionBtns = (app.status === 'completed' || hasMentorRequest) ? `
+  <div style="position:absolute;top:0.5rem;right:0.5rem;z-index:2;">
+    <button class="btn btn-sm btn-danger"
+      style="padding:0.2rem 0.6rem;font-size:1.2rem;line-height:1;"
+      title="You cannot discard this application"
+      disabled
+    >&times;</button>
+  </div>
+` : `
+  <div style="position:absolute;top:0.5rem;right:0.5rem;z-index:2;">
+    <button class="btn btn-sm btn-danger"
+      style="padding:0.2rem 0.6rem;font-size:1.2rem;line-height:1;"
+      title="Discard"
+      onclick="discardApplication('${app.id}', this)"
+    >&times;</button>
+  </div>
+`;
     const div = document.createElement('div');
     div.className = 'application-card';
     div.setAttribute('data-app-id', app.id);
@@ -2097,3 +2128,31 @@ function scrollToApplication(appId) {
   }
 }
 
+function handleWithdrawClick(btn) {
+  // Get mentorshipId and appId from button attributes
+  const mentorshipId = btn.getAttribute('data-mentorship-id');
+  const appId = btn.getAttribute('data-app-id');
+  if (!mentorshipId) return;
+
+  const confirmed = confirm('Are you sure you want to withdraw this mentorship request?');
+  if (!confirmed) return;
+
+  btn.disabled = true;
+  supabase
+    .from('mentorships')
+    .delete()
+    .eq('id', mentorshipId)
+    .then(({ error }) => {
+      if (error) {
+        alert('Failed to withdraw request.');
+        btn.disabled = false;
+      } else {
+        alert('Request withdrawn.');
+        // Optionally reload recommendations and applications
+        const app = window._menteeApplications?.find(a => a.id == appId);
+        if (app) loadRecommendationsForApplication(app);
+        loadMentorAndMenteeViews();
+        loadMenteeApplications();
+      }
+    });
+}
