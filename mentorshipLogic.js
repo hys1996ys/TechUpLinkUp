@@ -227,25 +227,29 @@ if (existing && existing.status === 'pending') {
 
     const div = document.createElement('div');
     div.className = 'application-card';
-    div.style.position = 'relative'; 
-div.innerHTML = `
-  <strong>Name:</strong>
-  <h3 style="font-weight: 400; color: #0f172a; margin: 0;">
-    ${mentor.name}
-    <span style="font-weight:400; color:#64748b; font-size:1rem; margin-left:0.5rem;">
-      (${score || 0}% Match)
-    </span>
-  </h3>
-  <strong>Description:</strong>
-  <div><em>${mentor.description || ''}</em></div>
-  <strong>Skills:</strong>
-  <div>${(mentor.skills || []).join(', ')}</div>
-  <strong>Learning Styles:</strong>
-  <div>${(mentor.learning_style || []).join(', ')}</div>
-  <strong>Communication Modes:</strong>
-  <div>${(mentor.comm_mode || []).join(', ')}</div>
-  ${btnHtml}
-`;
+    div.style.position = 'relative';
+    // Ensure consistent font family and size
+    div.style.fontFamily = 'inherit';
+    div.style.fontSize = '1rem';
+
+    div.innerHTML = `
+      <strong>Name:</strong>
+      <h3 style="font-weight: 400; color: #0f172a; margin: 0; font-family:inherit; font-size:1.1rem;">
+        ${mentor.name}
+        <span style="font-weight:400; color:#64748b; font-size:1rem; margin-left:0.5rem; font-family:inherit;">
+          (${score || 0}% Match)
+        </span>
+      </h3>
+      <strong>Description:</strong>
+      <div style="font-family:inherit; font-size:1rem;"><em>${mentor.description || ''}</em></div>
+      <strong>Skills:</strong>
+      <div style="font-family:inherit; font-size:1rem;">${(mentor.skills || []).join(', ')}</div>
+      <strong>Learning Styles:</strong>
+      <div style="font-family:inherit; font-size:1rem;">${(mentor.learning_style || []).join(', ')}</div>
+      <strong>Communication Modes:</strong>
+      <div style="font-family:inherit; font-size:1rem;">${(mentor.comm_mode || []).join(', ')}</div>
+      ${btnHtml}
+    `;
     container.appendChild(div);
   });
 
