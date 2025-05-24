@@ -182,13 +182,21 @@ document.addEventListener('DOMContentLoaded', async () => {
       mentorBtn.classList.remove('active');
       
       await loadMenteeApplications();
+      // Scroll to the top of the Applications section
+const appSection = document.querySelector('.scroll-container.mentee-applications');
+const section = appSection?.closest('section');
+if (section) {
+  section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+} else if (appSection) {
+  appSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
       loadRecommendationsForApplication(data); // Pass the new application object
     }
   });
 
   await loadMentorAndMenteeViews();
   
-  await loadRecommendationsForApplication()
+  
 });
 
 async function loadMenteeApplications() {

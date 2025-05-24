@@ -373,6 +373,7 @@ async function loadMenteeApplications() {
   inactive.forEach(div => container.appendChild(div));
 }
 
+
 function scrollToApplication(appId) {
   const appCard = document.querySelector(`.scroll-container.mentee-applications .application-card[data-app-id="${appId}"]`);
   if (appCard) {
@@ -381,3 +382,18 @@ function scrollToApplication(appId) {
     setTimeout(() => appCard.classList.remove('selected'), 2000); // Optional: highlight briefly
   }
 }
+
+// ✅ Wrap in an async IIFE
+(async () => {
+  await loadMenteeApplications();
+
+  // Scroll to the Applications section
+  const appSection = document.querySelector('.scroll-container.mentee-applications');
+  const section = appSection?.closest('section');
+  if (section) {
+    section.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  } else if (appSection) {
+    appSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  })();
