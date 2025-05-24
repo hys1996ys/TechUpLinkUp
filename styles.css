@@ -858,7 +858,41 @@ select[multiple] {
 }
 
 .application-card.inactive {
-  opacity: 0.5;
-  pointer-events: none;
-  filter: grayscale(0.7);
+  opacity: 1;
+  background: #e6f9ed; /* light green background */
+  border: 2px solid #22c55e; /* green border */
+  filter: none;
 }
+
+.tooltip-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.custom-tooltip {
+  visibility: hidden;
+  background: #222;
+  color: #fff;
+  text-align: left;
+  border-radius: 6px;
+  padding: 8px 12px;
+  position: absolute;
+  z-index: 10;
+  left: 50%;
+  top: 110%;
+  transform: translateX(-50%);
+  white-space: pre-line;
+  font-size: 0.95em;
+  min-width: 180px;
+  max-width: 300px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+}
+
+.tooltip-wrapper:hover .custom-tooltip {
+  visibility: visible;
+  opacity: 1;
+}
+

@@ -1,26 +1,39 @@
 // mentorshipLogic.js
 
 // Renders a mentor or mentee profile card
-function renderCard(profile, score, isPending = false, mentorshipId = null) {
-  const initials = profile?.name?.charAt(0)?.toUpperCase() || 'U';
+function renderCard(profile, score, isPending = false, mentorshipId = null, isMentor = false) {
+  const avatar = isMentor ? '' : `<div class="avatar-circle-sm">${profile?.name?.charAt(0)?.toUpperCase() || 'U'}</div>`;
   const skills = (profile.skills || []).map(skill => `<span class="badge">${skill}</span>`).join('');
   const goals = (profile.learning_goals || profile.learning_style || []).map(g => `<span class="badge">${g}</span>`).join('');
   const matchBar = isPending && score !== null && score !== undefined
     ? `<div class="compat-label">${score}% Match</div><div class="compat-bar"><div class="compat-fill" style="width: ${score}%;"></div></div>`
     : '';
+  // For mentor cards: Name (Job Title)
+  const nameLine = isMentor
+    ? `<h3>${profile.name}${profile.designation ? ` <span style="font-weight:400; color:#64748b;">(${profile.designation})</span>` : ''}</h3>`
+    : `<h3>${profile.name}</h3>`;
+  // For mentor cards: Description with title and spacing
+  const description = isMentor && profile.description
+    ? `<div style="height:0.5rem;"></div><strong>Description</strong><div style="margin-bottom:0.5rem;"><em>${profile.description}</em></div>`
+    : '';
+  const viewProfileBtn = isMentor
+    ? `<button class="btn full-width" onclick="scrollToApplication('${profile.application_id || ''}')"><i class="fa fa-eye"></i> View Application</button>`
+    : `<button class="btn full-width"><i class="fa fa-eye"></i> View Application</button>`;
   const actionBtn = isPending && mentorshipId
     ? `<button class="btn btn-success full-width" onclick="acceptMentee('${mentorshipId}', this)">Accept</button>
        <button class="btn btn-danger full-width" onclick="rejectMentee('${mentorshipId}', this)">Reject</button>`
-    : `<button class="btn full-width"><i class="fa fa-eye"></i> View Profile</button>`;
+    : viewProfileBtn;
 
   return `
     <div class="mentee-card">
-      <div class="avatar-circle-sm">${initials}</div>
-      <h3>${profile.name}</h3>
-      <p>${profile.designation || ''}</p>
+      ${avatar}
+      ${nameLine}
+      ${description}
+      ${!isMentor ? `<p>${profile.designation || ''}</p>` : ''}
       ${matchBar}
       <strong>Learning Goals</strong>
       <div class="badge-group">${goals}</div>
+      <div style="height:0.5rem;"></div>
       <strong>Skills</strong>
       <div class="badge-group">${skills}</div>
       ${actionBtn}
@@ -97,19 +110,22 @@ async function loadMentorAndMenteeViews() {
   // Mentee's mentors
   const { data: menteeMentorships } = await supabase
     .from('mentorships')
-    .select(`id, mentor_id, status, compatibility_score, mentor:profiles!mentorships_mentor_id_fkey (id, name, designation, skills, learning_style)`)
+    .select(`id, mentor_id, application_id, status, compatibility_score, mentor:profiles!mentorships_mentor_id_fkey (id, name, designation, skills, learning_style, description)`)
     .eq('mentee_id', user.id);
 
   const myMentors = menteeMentorships?.filter(m => m.status === 'active').slice(0, 3) || [];
   const myPending = menteeMentorships?.filter(m => m.status === 'pending') || [];
 
   document.querySelector('.scroll-container.mentee-active').innerHTML =
-    myMentors.map(m => renderCard(m.mentor, null, false)).join('') +
+    myMentors.map(m => renderCard({ ...m.mentor, application_id: m.application_id }, null, false, null, true)).join('') +
     (myMentors.length < 3 ? renderAddMentorCard() : renderMentorLimitReachedCard());
 
   document.querySelector('.scroll-container.mentee-pending').innerHTML =
-    myPending.map(m => renderCard(m.mentor, m.compatibility_score, true, m.id)).join('');
-}
+    myPending.map(m => renderCard(m.mentor, m.compatibility_score, true, m.id, true)).join('');
+
+    
+
+  }
 
 // Accept/reject mentee requests (mentor side)
 async function acceptMentee(mentorshipId, btn) {
@@ -167,7 +183,7 @@ async function loadRecommendationsForApplication(app) {
     .select('mentor_id, application_id, status')
     .eq('mentee_id', user.id);
 
-  const container = document.querySelector('.scroll-container.mentee-pending');
+  const container = document.querySelector('.scroll-container.mentor-recommendations');
   container.innerHTML = '';
 
   if (error) {
@@ -218,6 +234,9 @@ async function loadRecommendationsForApplication(app) {
     `;
     container.appendChild(div);
   });
+
+  // Scroll to mentor recommendations section after rendering
+  container.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 // Request/cancel mentorship (mentee side)
@@ -352,4 +371,13 @@ async function loadMenteeApplications() {
   container.innerHTML = '';
   pending.forEach(div => container.appendChild(div));
   inactive.forEach(div => container.appendChild(div));
+}
+
+function scrollToApplication(appId) {
+  const appCard = document.querySelector(`.scroll-container.mentee-applications .application-card[data-app-id="${appId}"]`);
+  if (appCard) {
+    appCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    appCard.classList.add('selected');
+    setTimeout(() => appCard.classList.remove('selected'), 2000); // Optional: highlight briefly
+  }
 }

@@ -63,17 +63,17 @@
     </section>
     <section class="mentor-cta">
       <div class="cta-text">
-        <h1>Pending Applications</h1>
-        <p>Your submitted mentorship applications</p>
+        <h1>Applications</h1>
+        <p>Track and manage all mentorship applications submitted.</p>
       </div>
       <div class="scroll-container mentee-applications"></div>
     </section>
     <section class="mentor-cta">
       <div class="cta-text">
         <h1>Mentor Recommendations</h1>
-        <p>Recommendations</p>
+        <p>Suggest mentors based on your submitted applications and interests. </p>
       </div>    
-      <div class="scroll-container mentee-pending"></div>
+      <div class="scroll-container mentor-recommendations"></div>
     </section>
   </div>
 </main>
@@ -236,6 +236,67 @@ console.log(applications);
     });
     container.appendChild(div);
   });
+}
+
+function renderCard(profile, score, isPending = false, mentorshipId = null, isMentor = false) {
+  // Only show avatar for mentee cards
+  const avatar = isMentor ? '' : `<div class="avatar-circle-sm">${profile?.name?.charAt(0)?.toUpperCase() || 'U'}</div>`;
+  const skills = (profile.skills || []).map(skill => `<span class="badge">${skill}</span>`).join('');
+  const goals = (profile.learning_goals || profile.learning_style || []).map(g => `<span class="badge">${g}</span>`).join('');
+  const matchBar = isPending && score !== null && score !== undefined
+    ? `<div class="compat-label">${score}% Match</div><div class="compat-bar"><div class="compat-fill" style="width: ${score}%;"></div></div>`
+    : '';
+  const description = isMentor && profile.description
+    ? `<div style="margin-bottom:0.5rem;"><em>${profile.description}</em></div>`
+    : '';
+  const actionBtn = isPending && mentorshipId
+    ? `<button class="btn btn-success full-width" onclick="acceptMentee('${mentorshipId}', this)">Accept</button>
+       <button class="btn btn-danger full-width" onclick="rejectMentee('${mentorshipId}', this)">Reject</button>`
+    : `<button class="btn full-width"><i class="fa fa-eye"></i> View Profile</button>`;
+
+  return `
+    <div class="mentee-card">
+      ${avatar}
+      <h3>${profile.name}</h3>
+      ${description}
+      <p>${profile.designation || ''}</p>
+      ${matchBar}
+      <strong>Learning Goals</strong>
+      <div class="badge-group">${goals}</div>
+      <strong>Skills</strong>
+      <div class="badge-group">${skills}</div>
+      ${actionBtn}
+    </div>`;
+}
+
+async function loadMentorAndMenteeViews() {
+  const { data: session } = await supabase.auth.getSession();
+  const user = session?.session?.user;
+
+  if (!user) {
+    console.log("User not logged in");
+    return;
+  }
+
+  // Load mentee active and pending sections
+  const { data: myMentors, error: mentorsError } = await supabase
+    .from('mentor_mentee')
+    .select('mentor:profiles(*), compatibility_score')
+    .eq('mentee_id', user.id)
+    .eq('status', 'active')
+    .order('compatibility_score', { ascending: false });
+
+  if (mentorsError) {
+    console.error('Error loading mentors:', mentorsError);
+    return;
+  }
+
+  document.querySelector('.scroll-container.mentee-active').innerHTML =
+    myMentors.map(m => renderCard(m.mentor, null, false, null, true)).join('') +
+    (myMentors.length < 3 ? renderAddMentorCard() : renderMentorLimitReachedCard());
+
+  document.querySelector('.scroll-container.mentee-pending').innerHTML =
+    myPending.map(m => renderCard(m.mentor, m.compatibility_score, true, m.id, true)).join('');
 }
 </script>
 
