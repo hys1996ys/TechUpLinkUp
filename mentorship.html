@@ -160,13 +160,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     const learningStyles = Array.from(document.getElementById('appLearningStyles').selectedOptions).map(opt => opt.value);
     const commModes = Array.from(document.getElementById('appCommModes').selectedOptions).map(opt => opt.value);
 
-    const { error } = await supabase.from('mentor_applications').insert({
+    const { data, error } = await supabase.from('mentor_applications').insert({
       user_id: user.id,
       learning_outcome: learningOutcome,
       skills,
       learning_style: learningStyles,
       comm_mode: commModes
-    });
+    }).select().single();
 
     if (error) {
       alert('Application submission failed.');
@@ -180,14 +180,15 @@ document.addEventListener('DOMContentLoaded', async () => {
       menteeView.classList.remove('hidden');
       menteeBtn.classList.add('active');
       mentorBtn.classList.remove('active');
+      
       await loadMenteeApplications();
-      reloadRecommendations();
+      loadRecommendationsForApplication(data); // Pass the new application object
     }
   });
 
   await loadMentorAndMenteeViews();
-  await loadMenteeApplications();
-  await reloadRecommendations();
+  
+  await loadRecommendationsForApplication()
 });
 
 async function loadMenteeApplications() {

@@ -248,13 +248,13 @@ async function requestMentorship(appId, mentorId, btn) {
   btn.disabled = true;
   btn.textContent = 'Sending...';
 
-  const { error } = await supabase.from('mentorships').insert({
+  const { data, error } = await supabase.from('mentor_applications').insert({
     mentee_id: user.id,
     mentor_id: mentorId,
     application_id: appId, // <-- add this
     status: 'pending',
     compatibility_score: 0
-  });
+  }).select().single();
 
   if (error) {
     alert("Failed to send request.");
