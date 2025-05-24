@@ -359,11 +359,10 @@ async function loadMenteeApplications() {
 
     // Add Edit and Discard buttons (top right)
     const actionBtns = `
-      <div style="position:absolute;top:0.5rem;right:0.5rem;z-index:2;">
-        <button class="btn btn-sm btn-secondary" onclick="editApplication('${app.id}')">Edit</button>
-        <button class="btn btn-sm btn-danger" onclick="discardApplication('${app.id}', this)">Discard</button>
-      </div>
-    `;
+  <div style="position:absolute;top:0.5rem;right:0.5rem;z-index:2;">
+    <button class="btn btn-sm btn-danger" style="padding:0.2rem 0.6rem;font-size:1.2rem;line-height:1;" title="Discard" onclick="discardApplication('${app.id}', this)">&times;</button>
+  </div>
+`;
 
     const div = document.createElement('div');
     div.className = 'application-card';
@@ -442,11 +441,6 @@ async function dissolveMentor(mentorshipId, btn) {
   }
 }
 
-function editApplication(appId) {
-  // You can open a modal or navigate to an edit page
-  // For now, just alert (implement your own modal logic)
-  alert('Edit functionality coming soon for application: ' + appId);
-}
 
 async function discardApplication(appId, btn) {
   if (!confirm('Are you sure you want to discard this application?')) return;

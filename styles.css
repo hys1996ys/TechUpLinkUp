@@ -896,3 +896,10 @@ select[multiple] {
   opacity: 1;
 }
 
+.btn.btn-danger[title="Discard"] {
+  background: none !important;
+  box-shadow: none !important;
+  color: black; /* Keep the red text */
+  border: none;
+}
+
