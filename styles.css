@@ -903,3 +903,12 @@ select[multiple] {
   border: none;
 }
 
+.btn-warning {
+  background: #fbbf24;
+  color: #fff;
+  border: none;
+}
+.btn-warning:hover {
+  background: #f59e42;
+}
+

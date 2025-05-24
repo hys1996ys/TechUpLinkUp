@@ -187,7 +187,7 @@ async function loadRecommendationsForApplication(app) {
   // Fetch existing mentorships for this mentee
   const { data: myMentorships } = await supabase
     .from('mentorships')
-    .select('mentor_id, application_id, status')
+    .select('id,mentor_id, application_id, status')
     .eq('mentee_id', user.id);
 
   const container = document.querySelector('.scroll-container.mentor-recommendations');
@@ -214,8 +214,11 @@ async function loadRecommendationsForApplication(app) {
     );
 
     let btnHtml = '';
- if (existing && existing.status === 'pending') {
-  btnHtml = `<button class="btn btn-success" disabled>Request Sent</button>`;
+if (existing && existing.status === 'pending') {
+  btnHtml = `
+    <button class="btn btn-success" disabled style="margin-bottom:0.5rem;display:block;width:100%;font-size:1.1rem;line-height:1.5;padding:0.2rem 0.6rem;">Request Sent</button>
+    <button class="btn" style="background:#e5e7eb;color:#374151;box-shadow:none;padding:0.2rem 0.6rem;font-size:1.1rem;line-height:1.5;display:block;width:100%;margin-top:0.5rem;font-family:inherit;" title="Withdraw" data-mentorship-id="${existing.id}" data-app-id="${app.id}" onclick="handleWithdrawClick(this)">Withdraw</button>
+  `;
 } else if (existing && existing.status === 'active') {
   btnHtml = `<button class="btn btn-secondary" disabled>Mentorship Active</button>`;
 } else {
@@ -224,21 +227,25 @@ async function loadRecommendationsForApplication(app) {
 
     const div = document.createElement('div');
     div.className = 'application-card';
-    div.innerHTML = `
-      <strong>Name:</strong>
-      <h3 style="font-weight: 400; color: #0f172a; margin: 0;">${mentor.name}</h3>
-      <strong>Description:</strong>
-      <div><em>${mentor.description || ''}</em></div>
-      <strong>Compatibility:</strong>
-      <div class="compat-label">${score || 0}% Match</div>
-      <strong>Skills:</strong>
-      <div>${(mentor.skills || []).join(', ')}</div>
-      <strong>Learning Styles:</strong>
-      <div>${(mentor.learning_style || []).join(', ')}</div>
-      <strong>Communication Modes:</strong>
-      <div>${(mentor.comm_mode || []).join(', ')}</div>
-      ${btnHtml}
-    `;
+    div.style.position = 'relative'; 
+div.innerHTML = `
+  <strong>Name:</strong>
+  <h3 style="font-weight: 400; color: #0f172a; margin: 0;">
+    ${mentor.name}
+    <span style="font-weight:400; color:#64748b; font-size:1rem; margin-left:0.5rem;">
+      (${score || 0}% Match)
+    </span>
+  </h3>
+  <strong>Description:</strong>
+  <div><em>${mentor.description || ''}</em></div>
+  <strong>Skills:</strong>
+  <div>${(mentor.skills || []).join(', ')}</div>
+  <strong>Learning Styles:</strong>
+  <div>${(mentor.learning_style || []).join(', ')}</div>
+  <strong>Communication Modes:</strong>
+  <div>${(mentor.comm_mode || []).join(', ')}</div>
+  ${btnHtml}
+`;
     container.appendChild(div);
   });
 
@@ -339,6 +346,8 @@ async function loadMenteeApplications() {
     .from('mentor_applications')
     .select('*')
     .eq('user_id', user.id);
+
+  window._menteeApplications = applications;
 
   // Fetch mentorships
   const { data: myMentorships, error: mentorError } = await supabase
@@ -456,4 +465,31 @@ async function discardApplication(appId, btn) {
     alert('Application discarded.');
     loadMenteeApplications();
   }
+}
+
+async function withdrawMentorship(mentorshipId, btn, app) {
+  if (!confirm('Are you sure you want to withdraw your mentorship request?')) return;
+  btn.disabled = true;
+  const { error } = await supabase
+    .from('mentorships')
+    .delete()
+    .eq('id', mentorshipId);
+  if (error) {
+    alert('Failed to withdraw request.');
+    btn.disabled = false;
+  } else {
+    alert('Request withdrawn.');
+    setTimeout(() => {
+      loadRecommendationsForApplication(app);
+      loadMentorAndMenteeViews();
+    }, 300);
+  }
+}
+
+function handleWithdrawClick(btn) {
+  const mentorshipId = btn.getAttribute('data-mentorship-id');
+  const appId = btn.getAttribute('data-app-id');
+  // Find the app object from your loaded applications (store them in a global variable if needed)
+  const app = window._menteeApplications?.find(a => a.id == appId);
+  withdrawMentorship(mentorshipId, btn, app);
 }

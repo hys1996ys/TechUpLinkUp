@@ -245,12 +245,20 @@ console.log(applications);
     div.className = 'application-card';
     div.setAttribute('data-app-id', app.id); // Add app id for reference
     div.innerHTML = `
-      <strong>Learning Outcome:</strong> ${app.learning_outcome}<br>
-      <strong>Skills:</strong> ${app.skills?.join(', ')}<br>
-      <strong>Learning Styles:</strong> ${app.learning_style?.join(', ')}<br>
-      <strong>Communication Modes:</strong> ${app.comm_mode?.join(', ')}<br>
-      <small>Submitted: ${new Date(app.created_at).toLocaleString()}</small>
-    `;
+  <strong>Name:</strong>
+  <h3 style="font-weight: 400; color: #0f172a; margin: 0;">${mentor.name}</h3>
+  <strong>Description:</strong>
+  <div><em>${mentor.description || ''}</em></div>
+  <strong>Compatibility:</strong>
+  <div class="compat-label">${score || 0}% Match</div>
+  <strong>Skills:</strong>
+  <div>${(mentor.skills || []).join(', ')}</div>
+  <strong>Learning Styles:</strong>
+  <div>${(mentor.learning_style || []).join(', ')}</div>
+  <strong>Communication Modes:</strong>
+  <div>${(mentor.comm_mode || []).join(', ')}</div>
+  ${btnHtml}
+`;
     // Add click event to load recommendations for this application
     div.addEventListener('click', () => {
       highlightSelectedApplication(div);
