@@ -215,7 +215,7 @@ async function loadRecommendationsForApplication(app) {
 } else if (existing && existing.status === 'active') {
   btnHtml = `<button class="btn btn-secondary" disabled>Mentorship Active</button>`;
 } else {
-  btnHtml = `<button class="btn btn-primary" onclick="requestMentorship('${app.id}', '${mentor.id}', this)">Request Mentorship</button>`;
+  btnHtml = `<button class="btn btn-primary" onclick='requestMentorship("${app.id}", "${mentor.id}", this, ${JSON.stringify(app)})'>Request Mentorship</button>`;
 }
 
     const div = document.createElement('div');
@@ -243,32 +243,40 @@ async function loadRecommendationsForApplication(app) {
 }
 
 // Request/cancel mentorship (mentee side)
-async function requestMentorship(appId, mentorId, btn) {
+async function requestMentorship(appId, mentorId, btn, app) {
   const { data: session } = await supabase.auth.getSession();
   const user = session?.session?.user;
   if (!user) return;
 
   btn.disabled = true;
-  btn.textContent = 'Sending...';
+btn.textContent = 'Sending...';
 
-  const { data, error } = await supabase.from('mentor_applications').insert({
-    mentee_id: user.id,
-    mentor_id: mentorId,
-    application_id: appId, // <-- add this
-    status: 'pending',
-    compatibility_score: 0
-  }).select().single();
+const { error } = await supabase.from('mentorships').insert({
+  mentee_id: user.id,
+  mentor_id: mentorId,
+  application_id: appId,
+  status: 'pending',
+  compatibility_score: 0
+});
 
-  if (error) {
-    alert("Failed to send request.");
-    console.error(error);
-    btn.disabled = false;
-    btn.textContent = 'Request Mentorship';
-  } else {
+if (error) {
+  alert("Failed to send request.");
+  console.error(error);
+  btn.disabled = false;
+  btn.textContent = 'Request Mentorship';
+} else {
+  // Update the button immediately for instant feedback
+  btn.textContent = 'Request Sent';
+  btn.classList.remove('btn-primary');
+  btn.classList.add('btn-success');
+
+  // Wait a bit longer for the DB to update, then reload recommendations
+  setTimeout(() => {
+    loadRecommendationsForApplication(app);
     loadMentorAndMenteeViews();
-    // Optionally reload recommendations if you want to update that section too
-    // loadRecommendationsForApplication(...);
-  }
+  }, 800); // 800ms delay
+}
+
 }
 
 async function cancelMentorship(mentorId, btn) {
