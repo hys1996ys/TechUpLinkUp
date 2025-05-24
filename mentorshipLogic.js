@@ -116,16 +116,19 @@ async function loadMentorAndMenteeViews() {
   const myMentors = menteeMentorships?.filter(m => m.status === 'active').slice(0, 3) || [];
   const myPending = menteeMentorships?.filter(m => m.status === 'pending') || [];
 
-  document.querySelector('.scroll-container.mentee-active').innerHTML =
-    myMentors.map(m => renderCard({ ...m.mentor, application_id: m.application_id }, null, false, null, true)).join('') +
-    (myMentors.length < 3 ? renderAddMentorCard() : renderMentorLimitReachedCard());
-
-  document.querySelector('.scroll-container.mentee-pending').innerHTML =
-    myPending.map(m => renderCard(m.mentor, m.compatibility_score, true, m.id, true)).join('');
-
-    
-
+  const menteeActiveContainer = document.querySelector('.scroll-container.mentee-active');
+  if (menteeActiveContainer) {
+    menteeActiveContainer.innerHTML =
+      myMentors.map(m => renderCard({ ...m.mentor, application_id: m.application_id }, null, false, null, true)).join('') +
+      (myMentors.length < 3 ? renderAddMentorCard() : renderMentorLimitReachedCard());
   }
+
+  const menteePendingContainer = document.querySelector('.scroll-container.mentee-pending');
+  if (menteePendingContainer) {
+    menteePendingContainer.innerHTML =
+      myPending.map(m => renderCard(m.mentor, m.compatibility_score, true, m.id, true)).join('');
+  }
+}
 
 // Accept/reject mentee requests (mentor side)
 async function acceptMentee(mentorshipId, btn) {
