@@ -8,21 +8,25 @@ function renderCard(profile, score, isPending = false, mentorshipId = null, isMe
   const matchBar = isPending && score !== null && score !== undefined
     ? `<div class="compat-label">${score}% Match</div><div class="compat-bar"><div class="compat-fill" style="width: ${score}%;"></div></div>`
     : '';
-  // For mentor cards: Name (Job Title)
   const nameLine = isMentor
     ? `<h3>${profile.name}${profile.designation ? ` <span style="font-weight:400; color:#64748b;">(${profile.designation})</span>` : ''}</h3>`
     : `<h3>${profile.name}</h3>`;
-  // For mentor cards: Description with title and spacing
   const description = isMentor && profile.description
     ? `<div style="height:0.5rem;"></div><strong>Description</strong><div style="margin-bottom:0.5rem;"><em>${profile.description}</em></div>`
     : '';
   const viewProfileBtn = isMentor
     ? `<button class="btn full-width" onclick="scrollToApplication('${profile.application_id || ''}')"><i class="fa fa-eye"></i> View Application</button>`
     : `<button class="btn full-width"><i class="fa fa-eye"></i> View Application</button>`;
+
+  // Add Dissolve Mentor button for mentee's mentors
+  const dissolveBtn = (isMentor && mentorshipId)
+    ? `<button class="btn btn-danger full-width" style="margin-top:0.5rem" onclick="dissolveMentor('${mentorshipId}', this)">Dissolve Mentor</button>`
+    : '';
+
   const actionBtn = isPending && mentorshipId
     ? `<button class="btn btn-success full-width" onclick="acceptMentee('${mentorshipId}', this)">Accept</button>
        <button class="btn btn-danger full-width" onclick="rejectMentee('${mentorshipId}', this)">Reject</button>`
-    : viewProfileBtn;
+    : viewProfileBtn + dissolveBtn;
 
   return `
     <div class="mentee-card">
@@ -117,11 +121,11 @@ async function loadMentorAndMenteeViews() {
   const myPending = menteeMentorships?.filter(m => m.status === 'pending') || [];
 
   const menteeActiveContainer = document.querySelector('.scroll-container.mentee-active');
-  if (menteeActiveContainer) {
-    menteeActiveContainer.innerHTML =
-      myMentors.map(m => renderCard({ ...m.mentor, application_id: m.application_id }, null, false, null, true)).join('') +
-      (myMentors.length < 3 ? renderAddMentorCard() : renderMentorLimitReachedCard());
-  }
+if (menteeActiveContainer) {
+  menteeActiveContainer.innerHTML =
+    myMentors.map(m => renderCard({ ...m.mentor, application_id: m.application_id }, null, false, m.id, true)).join('') +
+    (myMentors.length < 3 ? renderAddMentorCard() : renderMentorLimitReachedCard());
+}
 
   const menteePendingContainer = document.querySelector('.scroll-container.mentee-pending');
   if (menteePendingContainer) {
@@ -353,13 +357,23 @@ async function loadMenteeApplications() {
       m => m.application_id === app.id && m.status === 'active'
     );
 
+    // Add Edit and Discard buttons (top right)
+    const actionBtns = `
+      <div style="position:absolute;top:0.5rem;right:0.5rem;z-index:2;">
+        <button class="btn btn-sm btn-secondary" onclick="editApplication('${app.id}')">Edit</button>
+        <button class="btn btn-sm btn-danger" onclick="discardApplication('${app.id}', this)">Discard</button>
+      </div>
+    `;
+
     const div = document.createElement('div');
     div.className = 'application-card';
+    div.style.position = 'relative'; // Ensure absolute buttons are positioned correctly
     if (activeMentorship) {
       div.classList.add('inactive');
     }
     div.setAttribute('data-app-id', app.id);
     div.innerHTML = `
+      ${actionBtns}
       <strong>Learning Outcome:</strong> ${app.learning_outcome}<br>
       <strong>Skills:</strong> ${app.skills?.join(', ')}<br>
       <strong>Learning Styles:</strong> ${app.learning_style?.join(', ')}<br>
@@ -408,3 +422,44 @@ function scrollToApplication(appId) {
   }
 
   })();
+
+async function dissolveMentor(mentorshipId, btn) {
+  if (!confirm('Are you sure you want to dissolve this mentorship?')) return;
+  btn.disabled = true;
+  const { error } = await supabase
+    .from('mentorships')
+    .delete()
+    .eq('id', mentorshipId); // This deletes only the specific mentorship row
+  if (error) {
+    alert('Failed to dissolve mentorship.');
+    btn.disabled = false;
+  } else {
+    alert('Mentorship dissolved.');
+    setTimeout(() => {
+      loadMentorAndMenteeViews();
+      loadMenteeApplications();
+    }, 300);
+  }
+}
+
+function editApplication(appId) {
+  // You can open a modal or navigate to an edit page
+  // For now, just alert (implement your own modal logic)
+  alert('Edit functionality coming soon for application: ' + appId);
+}
+
+async function discardApplication(appId, btn) {
+  if (!confirm('Are you sure you want to discard this application?')) return;
+  btn.disabled = true;
+  const { error } = await supabase
+    .from('mentor_applications')
+    .delete()
+    .eq('id', appId);
+  if (error) {
+    alert('Failed to discard application.');
+    btn.disabled = false;
+  } else {
+    alert('Application discarded.');
+    loadMenteeApplications();
+  }
+}
