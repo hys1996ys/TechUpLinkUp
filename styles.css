@@ -912,3 +912,22 @@ select[multiple] {
   background: #f59e42;
 }
 
+.btn-filter {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  border-radius: 9999px;
+  padding: 0.4rem 1.2rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border 0.2s;
+  outline: none;
+}
+.btn-filter.active,
+.btn-filter:focus,
+.btn-filter:hover {
+  background: #007bff;
+  color: #fff;
+  border-color: #007bff;
+}
+
