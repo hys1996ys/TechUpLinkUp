@@ -603,6 +603,39 @@ function highlightSelectedApplication(selectedDiv) {
 // Initial load
 // Initial load
 document.addEventListener('DOMContentLoaded', async () => {
+  // Fetch user session
+  const { data: session } = await supabase.auth.getSession();
+  const user = session?.session?.user;
+
+  // Redirect to home if not logged in
+  if (!user) {
+    window.location.href = 'index.html';
+    return;
+  }
+  
+  let userName = 'User';
+
+  const logoutBtn = document.getElementById('logoutBtn');
+  if (user) {
+    // Fetch profile from Supabase
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('name')
+      .eq('id', user.id)
+      .single();
+    if (profile && profile.name) {
+      userName = profile.name;
+    }
+    document.getElementById('userGreeting').classList.remove('hidden');
+    logoutBtn?.classList.remove('hidden');
+  } else {
+    document.getElementById('userGreeting').classList.add('hidden');
+    logoutBtn?.classList.add('hidden');
+  }
+
+  document.getElementById('userName').textContent = userName;
+document.getElementById('userGreeting').classList.remove('hidden');
+
   document.addEventListener('click', async function(e) {
   if (e.target.classList.contains('findMenteesBtn')) {
     e.preventDefault();
@@ -1416,3 +1449,8 @@ async function requestMentorshipFromMentor(appId, btn) {
   loadMentorApplications();
 }
 }
+
+document.getElementById('logoutBtn')?.addEventListener('click', async () => {
+  await supabase.auth.signOut();
+  window.location.href = 'index.html';
+});

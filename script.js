@@ -1,6 +1,15 @@
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 document.addEventListener('DOMContentLoaded', async () => {
+    // Fetch user session FIRST
+  const { data: sessionData } = await supabase.auth.getSession();
+  const user = sessionData?.session?.user;
+
+  // Redirect to home if not logged in
+  if (!user) {
+    window.location.href = 'index.html';
+    return;
+  }
   // Shared Elements
   const signInBtn = document.getElementById('openSignin');
   const signUpBtn = document.getElementById('openSignup');
