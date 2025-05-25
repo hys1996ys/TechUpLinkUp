@@ -603,7 +603,6 @@ function highlightSelectedApplication(selectedDiv) {
 // Initial load
 // Initial load
 document.addEventListener('DOMContentLoaded', async () => {
-<<<<<<< HEAD
   // Fetch user session
   const { data: session } = await supabase.auth.getSession();
   const user = session?.session?.user;
@@ -640,24 +639,14 @@ document.getElementById('userGreeting').classList.remove('hidden');
   document.addEventListener('click', async function(e) {
   if (e.target.classList.contains('findMenteesBtn')) {
     e.preventDefault();
-=======
-  const findMenteesBtn = document.getElementById('findMenteesBtn');
-  if (findMenteesBtn) {
-  findMenteesBtn.addEventListener('click', async function() {
->>>>>>> 588c1f779ddcbc9b9690f78a9c30e1b269f7702d
     const recSection = document.querySelector('.scroll-container.mentee-recommendations');
     const section = recSection.closest('section') || recSection;
     recSection.classList.remove('hidden');
     recSection.style.display = '';
     await loadMenteeRecommendations();
     section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-<<<<<<< HEAD
   }
 });
-=======
-  });
-}
->>>>>>> 588c1f779ddcbc9b9690f78a9c30e1b269f7702d
 
   document.querySelectorAll('.btn-filter').forEach(btn => {
     btn.addEventListener('click', function() {
@@ -1295,7 +1284,6 @@ async function loadMenteeRecommendations() {
     .eq('id', user.id)
     .single();
 
-<<<<<<< HEAD
     // --- Add this check ---
   if (!mentorProfile || mentorProfile.accepting_applications !== true) {
  recSection.innerHTML = `
@@ -1318,21 +1306,11 @@ async function loadMenteeRecommendations() {
     .select('application_id, status');
 
   // 3. Get mentorships sent by this mentor
-=======
-  // Get all mentee applications
-  const { data: mentor_applications } = await supabase
-  .from('mentor_applications')
-  .select('*')
-  .eq('status', 'pending'); // Only show open applications
-
-  // Get mentorships sent by this mentor
->>>>>>> 588c1f779ddcbc9b9690f78a9c30e1b269f7702d
   const { data: myMentorships } = await supabase
     .from('mentorships')
     .select('application_id, mentor_id')
     .eq('mentor_id', user.id);
 
-<<<<<<< HEAD
   // 4. Build a set of application IDs that already have an active mentorship
   const activeAppIds = new Set((allMentorships || [])
     .filter(m => m.status === 'active')
@@ -1367,12 +1345,6 @@ filteredApps.forEach(app => {
     : 0;
 });
 
-=======
-  // Filter out applications where this mentor has already sent a request
-  const sentAppIds = new Set((myMentorships || []).map(m => m.application_id));
-  const filteredApps = (mentor_applications || []).filter(app => !sentAppIds.has(app.id));
-  
->>>>>>> 588c1f779ddcbc9b9690f78a9c30e1b269f7702d
   // Compute compatibility (reuse your computeCompatibility function if available)
   filteredApps.forEach(app => {
     app.score = typeof computeCompatibility === 'function'
@@ -1384,7 +1356,6 @@ filteredApps.forEach(app => {
   filteredApps.sort((a, b) => (b.score || 0) - (a.score || 0));
 
   // Render cards
-<<<<<<< HEAD
 recSection.innerHTML = '';
 if (filteredApps.length === 0) {
   recSection.innerHTML = `
@@ -1429,37 +1400,6 @@ filteredApps.forEach(app => {
     No mentee applications found that match your profile.
   </div>
 `;
-=======
-  recSection.innerHTML = '';
-  filteredApps.forEach(app => {
-    const div = document.createElement('div');
-    div.className = 'application-card';
-    div.innerHTML = `
-      <strong>Name:</strong>
-      <h3 style="font-weight: 400; color: #0f172a; margin: 0;">
-        ${app.name || 'Unknown'}
-        <span style="font-weight:400; color:#64748b; font-size:1rem; margin-left:0.5rem;">
-          (${app.score || 0}% Match)
-        </span>
-      </h3>
-      <strong>Learning Outcome:</strong>
-      <div>${app.learning_outcome || ''}</div>
-      <strong>Skills:</strong>
-      <div>${(app.skills || []).join(', ')}</div>
-      <strong>Learning Styles:</strong>
-      <div>${(app.learning_style || []).join(', ')}</div>
-      <strong>Communication Modes:</strong>
-      <div>${(app.comm_mode || []).join(', ')}</div>
-      <button class="btn btn-primary full-width" onclick="requestMentorshipFromMentor('${app.id}', this)">
-        <i class="fa fa-paper-plane"></i> Send Mentorship Request
-      </button>
-    `;
-    recSection.appendChild(div);
-  });
-
-  if (filteredApps.length === 0) {
-    recSection.innerHTML = '<div class="empty">No mentee applications found that match your profile.</div>';
->>>>>>> 588c1f779ddcbc9b9690f78a9c30e1b269f7702d
   }
 }
 
@@ -1470,7 +1410,6 @@ async function requestMentorshipFromMentor(appId, btn) {
   const user = session?.session?.user;
   if (!user) return;
 
-<<<<<<< HEAD
   // Fetch the application to get the mentee's user_id
   const { data: appData, error: appFetchError } = await supabase
     .from('mentor_applications')
@@ -1514,30 +1453,4 @@ async function requestMentorshipFromMentor(appId, btn) {
 document.getElementById('logoutBtn')?.addEventListener('click', async () => {
   await supabase.auth.signOut();
   window.location.href = 'index.html';
-=======
-  const { error } = await supabase.from('mentorships').insert([
-    { mentor_id: user.id, application_id: appId, status: 'pending' }
-  ]);
-  if (error) {
-    btn.textContent = 'Failed';
-    btn.classList.add('btn-danger');
-    alert('Failed to send mentorship request.');
-  } else {
-    btn.textContent = 'Request Sent';
-    btn.classList.remove('btn-primary');
-    btn.classList.add('btn-success');
-  }
-}
-
-document.addEventListener('click', async function(e) {
-  if (e.target.classList.contains('findMenteesBtn')) {
-    e.preventDefault();
-    const recSection = document.querySelector('.scroll-container.mentee-recommendations');
-    const section = recSection.closest('section') || recSection;
-    recSection.classList.remove('hidden');
-    recSection.style.display = '';
-    await loadMenteeRecommendations();
-    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
->>>>>>> 588c1f779ddcbc9b9690f78a9c30e1b269f7702d
 });
