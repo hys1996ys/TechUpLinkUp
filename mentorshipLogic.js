@@ -1253,13 +1253,12 @@ async function loadMenteeRecommendations() {
 
     // --- Add this check ---
   if (!mentorProfile || mentorProfile.accepting_applications !== true) {
-  recSection.innerHTML = `
-    <div class="info" style="background:#e0f2fe; color:#0369a1; border-left:4px solid #0ea5e9; padding:1rem; border-radius:0.5rem; margin-bottom:1rem;">
-      <i class="fa fa-info-circle" style="margin-right:0.5rem; color:#0ea5e9;"></i>
-      You are not accepting applications.<br>
-      <span style="font-weight:500;">Toggle <b>"I am accepting applications"</b> in your profile to see recommendations.</span>
-    </div>
-  `;
+ recSection.innerHTML = `
+  <div class="info" style="background:#e0f2fe; color:#0369a1; border-left:4px solid #0ea5e9; padding:1.2rem 2rem; border-radius:0.5rem; margin:1.5rem 0; width:100%; max-width:none; box-sizing:border-box; text-align:left; white-space:nowrap; overflow-x:auto;">
+    <i class="fa fa-info-circle" style="margin-right:0.5rem; color:#0ea5e9;"></i>
+    You are not accepting applications. Toggle <b>"Actively accepting applications"</b> in your profile to see recommendations.
+  </div>
+`;
   return;
 }
   // 1. Get all mentee applications with status 'pending'
