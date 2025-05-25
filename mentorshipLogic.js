@@ -3,7 +3,7 @@
 let applicationFilter = 'all'; // global filter state
 
 // Renders a mentor or mentee profile card
-function renderCard(profile, score, isPending = false, mentorshipId = null, isMentor = false) {
+function renderCard(profile, score = null, isPending = false, mentorshipId = null, isMentor = false, applicationId = null) {
   // Only show avatar for mentee cards
   const avatar = isMentor ? '' : `<div class="avatar-circle-sm">${profile?.name?.charAt(0)?.toUpperCase() || 'U'}</div>`;
   const matchBar = isPending && score !== null && score !== undefined
@@ -29,7 +29,8 @@ function renderCard(profile, score, isPending = false, mentorshipId = null, isMe
   const actionBtn = isPending && mentorshipId
     ? `<button class="btn btn-success full-width" onclick="acceptMentee('${mentorshipId}', this)">Accept</button>
        <button class="btn btn-danger full-width" onclick="rejectMentee('${mentorshipId}', this)">Reject</button>`
-    : `<button class="btn btn-success full-width" onclick="scrollToApplication('${profile.application_id || ''}')"><i class="fa fa-eye"></i> View Application</button>`;
+   : `<button class="btn btn-success full-width" onclick="scrollToApplication('${applicationId || profile.application_id || ''}')"><i class="fa fa-eye"></i> View Application</button>`;
+  
 
 return `
   <div class="mentee-card" style="font-family:inherit;font-size:1rem;">
@@ -148,34 +149,7 @@ const activeMentees = mentorships
   .slice(0, 3) || [];
 const mentorActiveContainer = document.querySelector('.scroll-container.active');
 if (mentorActiveContainer) {
-  let html = activeMentees.map(m => {
-    const mentee = m.mentee || {};
-  const appData = appMap[m.application_id] || {};
-  const learningOutcome = appData.learning_outcome || 'No learning outcome provided';
-    const skills = Array.isArray(appData.skills) ? appData.skills.join(', ') : (appData.skills || '');
-    const learningStyles = Array.isArray(appData.learning_style) ? appData.learning_style.join(', ') : (appData.learning_style || '');
-    const commModes = Array.isArray(appData.comm_mode) ? appData.comm_mode.join(', ') : (appData.comm_mode || '');
-  return `
-    <div class="mentee-card" style="font-family:inherit;font-size:1rem;">
-      <div class="avatar-circle-sm">${mentee?.name?.charAt(0)?.toUpperCase() || 'U'}</div>
-      <h3 style="font-weight: bold; color: #007bff; margin: 0 0 0.5rem 0; font-family:inherit; font-size:1.1rem;">
-        ${mentee.name || 'Unknown'}
-        ${mentee.designation ? `<span style="font-weight:bold;color:#007bff;font-size:1rem; margin-left:0.5rem;">(${mentee.designation})</span>` : ''}
-      </h3>
-      <strong style="display:block;margin-bottom:0.25rem;font-family:inherit;font-size:1rem;color:#007bff;">Learning Outcome:</strong>
-      <div style="margin-bottom:0.75rem;font-family:inherit;font-size:1rem;"><em>${learningOutcome}</em></div>
-      <strong style="display:block;margin-bottom:0.25rem;font-family:inherit;font-size:1rem;color:#007bff;">Skills:</strong>
-      <div style="margin-bottom:0.75rem;font-family:inherit;font-size:1rem;">${skills}</div>
-      <strong style="display:block;margin-bottom:0.25rem;font-family:inherit;font-size:1rem;color:#007bff;">Learning Styles:</strong>
-      <div style="margin-bottom:0.75rem;font-family:inherit;font-size:1rem;">${learningStyles}</div>
-      <strong style="display:block;margin-bottom:0.25rem;font-family:inherit;font-size:1rem;color:#007bff;">Communication Modes:</strong>
-      <div style="margin-bottom:0.75rem;font-family:inherit;font-size:1rem;">${commModes}</div>
-      <button class="btn btn-primary full-width" onclick="scrollToApplication('${m.application_id}')">
-        <i class="fa fa-eye"></i> View Application
-      </button>
-    </div>
-  `;
-  }).join('');
+  let html = activeMentees.map(m => renderCard(m.mentee, null, false, null, true, m.application_id)).join('');
   if (activeMentees.length < 3) {
     for (let i = 0; i < 3 - activeMentees.length; i++) {
       html += renderAddMenteeCard();
@@ -200,7 +174,8 @@ if (pendingContainer && typeof pendingMentees !== 'undefined') {
   const myPending = menteeMentorships?.filter(m => m.status === 'pending') || [];
 
  const myMentors = menteeMentorships?.filter(m => m.status === 'active').slice(0, 3) || [];
- console.log('myMentors:', myMentors);
+ console.log('Mentee mentorships:', menteeMentorships);
+console.log('My mentors:', myMentors);
 
 // --- Insert here ---
 const mentorAppIds = myMentors.map(m => m.application_id).filter(Boolean);
@@ -232,7 +207,8 @@ if (menteeActiveContainer) {
       null,
       false,
       m.id,
-      true
+      true,
+      m.application_id 
     );
   }).join('');
   if (myMentors.length < 3) {
@@ -419,6 +395,7 @@ if (error) {
     loadRecommendationsForApplication(app);
     loadMentorAndMenteeViews();
      loadMenteeApplications();
+      loadMentorApplications();
   }, 800); // 800ms delay
 }
 
@@ -581,6 +558,7 @@ if (error) {
     loadRecommendationsForApplication(app);
     loadMentorAndMenteeViews();
      loadMenteeApplications();
+       loadMentorApplications(); 
   }, 800); // 800ms delay
 }
 
@@ -1144,28 +1122,45 @@ async function loadMentorApplications() {
   const user = session?.session?.user;
   if (!user) return;
 
-  // 1. Fetch applications where you are the mentor
-  const { data: applications, error } = await supabase
-    .from('mentor_applications')
-    .select('*')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false });
+  // 1. Fetch mentorships where you are the mentor
+  const { data: mentorships, error: mentorshipsError } = await supabase
+    .from('mentorships')
+    .select('id, mentee_id, application_id, status')
+    .eq('mentor_id', user.id);
 
   const container = document.querySelector('.scroll-container.mentor-applications');
   container.innerHTML = '';
-  if (error) {
-    container.innerHTML = '<div class="error">Failed to load applications.</div>';
+  if (mentorshipsError) {
+    container.innerHTML = '<div class="error">Failed to load mentorships.</div>';
     return;
   }
-  if (!applications || applications.length === 0) {
+  if (!mentorships || mentorships.length === 0) {
     container.innerHTML = '<div class="empty">No applications found.</div>';
     return;
   }
 
-  // 2. Collect mentee_ids from applications
-  const menteeIds = applications.map(app => app.user_id).filter(Boolean);
+  // 2. Collect application_ids and mentee_ids
+  const appIds = mentorships.map(m => m.application_id).filter(Boolean);
+  const menteeIds = mentorships.map(m => m.mentee_id).filter(Boolean);
 
-  // 3. Fetch mentee profiles
+  // 3. Fetch applications for those ids
+  let appMap = {};
+  if (appIds.length > 0) {
+    const { data: applications, error: appError } = await supabase
+      .from('mentor_applications')
+      .select('*')
+      .in('id', appIds);
+
+    if (appError) {
+      container.innerHTML = '<div class="error">Failed to load applications.</div>';
+      return;
+    }
+    (applications || []).forEach(app => {
+      appMap[app.id] = app;
+    });
+  }
+
+  // 4. Fetch mentee profiles
   let menteeMap = {};
   if (menteeIds.length > 0) {
     const { data: mentees, error: menteeError } = await supabase
@@ -1182,36 +1177,57 @@ async function loadMentorApplications() {
     });
   }
 
-  // 4. Filtering logic
+  // 5. Prepare and render cards by status
   function renderMentorApps(filter = 'all') {
-    let filtered = applications;
+    let filtered = mentorships;
     if (filter !== 'all') {
-      filtered = applications.filter(app => app.status === filter);
+      filtered = mentorships.filter(m => m.status === filter);
     }
     if (!filtered.length) {
       container.innerHTML = '<div class="empty">No applications found.</div>';
       return;
     }
-    container.innerHTML = filtered.map(app => {
-      const mentee = menteeMap[app.user_id] || {};
-      return `
-        <div class="application-card">
-          <strong>Name:</strong>
-          <h3 style="font-weight: 400; color: #0f172a; margin: 0;">${mentee.name || 'Unknown'}</h3>
-          <strong>Description:</strong>
-          <div><em>${mentee.description || ''}</em></div>
-          <strong>Status:</strong>
-          <div>${app.status || ''}</div>
-          <strong>Skills:</strong>
-          <div>${(mentee.skills || []).join(', ')}</div>
-          <strong>Learning Styles:</strong>
-          <div>${(mentee.learning_style || []).join(', ')}</div>
-          <strong>Communication Modes:</strong>
-          <div>${(mentee.comm_mode || []).join(', ')}</div>
-        </div>
-      `;
-    }).join('');
+    container.innerHTML = filtered.map(m => {
+  const app = appMap[m.application_id] || {};
+  const mentee = menteeMap[m.mentee_id] || {};
+
+  // Status badge styling
+  let statusHtml = `<small>Status: ${m.status ? m.status.charAt(0).toUpperCase() + m.status.slice(1) : ''}</small>`;
+
+  // Card color styling
+  let cardStyle = '';
+  if (m.status === 'completed') {
+    cardStyle = 'background:#f3f4f6;border:2px solid #d1d5db;opacity:1;';
+  } else if (m.status === 'active') {
+    cardStyle = 'background:#d1fae5;border:2px solid #10b981;opacity:1;';
   }
+
+  return `
+    <div class="application-card" data-app-id="${m.application_id}" style="${cardStyle} position:relative;">
+      <strong>Name:</strong>
+      <h3 style="font-weight: 400; color: #0f172a; margin: 0;">${mentee.name || 'Unknown'}</h3>
+      <strong>Learning Outcome:</strong>
+      <div>${app.learning_outcome || ''}</div>
+      <strong>Skills:</strong>
+      <div>${(app.skills || []).join(', ')}</div>
+      <strong>Learning Styles:</strong>
+      <div>${(app.learning_style || []).join(', ')}</div>
+      <strong>Communication Modes:</strong>
+      <div style="margin-bottom:0.5rem;">${(app.comm_mode || []).join(', ')}</div>
+      <div style="margin-top:0.5rem;">${statusHtml}</div>
+      ${m.status === 'completed'
+        ? `<div style="position:absolute;top:0.5rem;left:0.5rem;">
+            <i class="fa fa-lock" title="This application is completed." style="color:#6b7280;font-size:1.3rem;"></i>
+           </div>`
+        : m.status === 'active'
+        ? `<div style="position:absolute;top:0.5rem;left:0.5rem;">
+            <i class="fa fa-lock" title="This application is active." style="color:#059669;font-size:1.3rem;"></i>
+           </div>`
+        : ''
+      }
+    </div>
+  `;
+}).join(''); }
 
   // Initial render
   renderMentorApps();
@@ -1224,5 +1240,4 @@ async function loadMentorApplications() {
       renderMentorApps(btn.dataset.filter);
     };
   });
-}
-;
+};
