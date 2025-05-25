@@ -13,6 +13,12 @@ function renderCard(profile, score = null, isPending = false, mentorshipId = nul
     ? `<strong style="display:block;margin-bottom:0.25rem;font-family:inherit;font-size:1rem;color:#007bff;">Description:</strong>
        <div style="margin-bottom:0.75rem;font-family:inherit;font-size:1rem;"><em>${profile.description}</em></div>`
     : '';
+
+    const learningOutcome = isMentor && profile.learning_outcome
+  ? `<strong style="display:block;margin-bottom:0.25rem;font-family:inherit;font-size:1rem;color:#007bff;">Learning Outcome:</strong>
+     <div style="margin-bottom:0.75rem;font-family:inherit;font-size:1rem;">${profile.learning_outcome}</div>`
+  : '';
+
   // Mentor card: plain text, not badges, with spacing and font
   const skills = isMentor
     ? `<strong style="display:block;margin-bottom:0.25rem;font-family:inherit;font-size:1rem;color:#007bff;">Skills:</strong>
@@ -39,7 +45,8 @@ return `
       ${profile.name}
       ${profile.designation ? `<span style="font-weight:bold;color:#007bff;font-size:1rem; margin-left:0.5rem;">(${profile.designation})</span>` : ''}
     </h3>
-    ${description}
+  
+      ${learningOutcome}
     ${matchBar}
     ${skills}
     ${learningStyles}
@@ -149,7 +156,17 @@ const activeMentees = mentorships
   .slice(0, 3) || [];
 const mentorActiveContainer = document.querySelector('.scroll-container.active');
 if (mentorActiveContainer) {
-  let html = activeMentees.map(m => renderCard(m.mentee, null, false, null, true, m.application_id)).join('');
+  let html = activeMentees.map(m => {
+    const appFields = appMap[m.application_id] || {};
+    return renderCard(
+      { ...m.mentee, ...appFields },
+      null,
+      false,
+      null,
+      true,
+      m.application_id
+    );
+  }).join('');
   if (activeMentees.length < 3) {
     for (let i = 0; i < 3 - activeMentees.length; i++) {
       html += renderAddMenteeCard();
@@ -586,17 +603,17 @@ function highlightSelectedApplication(selectedDiv) {
 // Initial load
 // Initial load
 document.addEventListener('DOMContentLoaded', async () => {
-  const findMenteesBtn = document.getElementById('findMenteesBtn');
-  if (findMenteesBtn) {
-  findMenteesBtn.addEventListener('click', async function() {
+  document.addEventListener('click', async function(e) {
+  if (e.target.classList.contains('findMenteesBtn')) {
+    e.preventDefault();
     const recSection = document.querySelector('.scroll-container.mentee-recommendations');
     const section = recSection.closest('section') || recSection;
     recSection.classList.remove('hidden');
     recSection.style.display = '';
     await loadMenteeRecommendations();
     section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  });
-}
+  }
+});
 
   document.querySelectorAll('.btn-filter').forEach(btn => {
     btn.addEventListener('click', function() {
@@ -825,11 +842,10 @@ if (activeMentorship) {
     if (recSection) {
       recSection.classList.remove('hidden');
       recSection.style.display = '';
-      recSection.innerHTML = `
-  <div class="info" style="padding:1rem;">
-    <i class="fa fa-info-circle" style="color:#059669;font-size:1.5rem;"></i>
-    <div style="margin-top:0.5rem;">You already have an <b>active mentor</b> for this application.<br><br>
-    Please refer to your active mentors above.</div>
+    recSection.innerHTML = `
+  <div class="empty" style="background:#f8fafc; color:#111827; border-left:4px solid #e5e7eb; padding:1.2rem 2rem; border-radius:0.5rem; margin:1.5rem 0; width:100%; max-width:100%; box-sizing:border-box; text-align:left;">
+    <i class="fa fa-info-circle" style="margin-right:0.5rem; color:#94a3b8;"></i>
+    No mentee applications found that match your profile.
   </div>
 `;
     }
@@ -1235,22 +1251,68 @@ async function loadMenteeRecommendations() {
     .eq('id', user.id)
     .single();
 
-  // Get all mentee applications
+    // --- Add this check ---
+  if (!mentorProfile || mentorProfile.accepting_applications !== true) {
+  recSection.innerHTML = `
+    <div class="info" style="background:#e0f2fe; color:#0369a1; border-left:4px solid #0ea5e9; padding:1rem; border-radius:0.5rem; margin-bottom:1rem;">
+      <i class="fa fa-info-circle" style="margin-right:0.5rem; color:#0ea5e9;"></i>
+      You are not accepting applications.<br>
+      <span style="font-weight:500;">Toggle <b>"I am accepting applications"</b> in your profile to see recommendations.</span>
+    </div>
+  `;
+  return;
+}
+  // 1. Get all mentee applications with status 'pending'
   const { data: mentor_applications } = await supabase
-  .from('mentor_applications')
-  .select('*')
-  .eq('status', 'pending'); // Only show open applications
+    .from('mentor_applications')
+    .select('*')
+    .eq('status', 'pending');
 
-  // Get mentorships sent by this mentor
+  // 2. Get all mentorships (to check for active ones)
+  const { data: allMentorships } = await supabase
+    .from('mentorships')
+    .select('application_id, status');
+
+  // 3. Get mentorships sent by this mentor
   const { data: myMentorships } = await supabase
     .from('mentorships')
     .select('application_id, mentor_id')
     .eq('mentor_id', user.id);
 
-  // Filter out applications where this mentor has already sent a request
+  // 4. Build a set of application IDs that already have an active mentorship
+  const activeAppIds = new Set((allMentorships || [])
+    .filter(m => m.status === 'active')
+    .map(m => m.application_id));
+
+  // 5. Build a set of application IDs that this mentor has already sent a request to
   const sentAppIds = new Set((myMentorships || []).map(m => m.application_id));
-  const filteredApps = (mentor_applications || []).filter(app => !sentAppIds.has(app.id));
-  
+
+  // 6. Filter: Only show applications that are pending, have no active mentorship, and you haven't already sent a request
+  const filteredApps = (mentor_applications || []).filter(app =>
+      !activeAppIds.has(app.id) &&
+  !sentAppIds.has(app.id) &&
+  app.user_id !== user.id //
+    
+  );
+
+  // Fetch applicant profiles for filtered apps
+const userIds = (filteredApps || []).map(app => app.user_id);
+let userMap = {};
+if (userIds.length > 0) {
+  const { data: users } = await supabase
+    .from('profiles')
+    .select('id, name')
+    .in('id', userIds);
+  (users || []).forEach(u => { userMap[u.id] = u; });
+}
+
+// Compute compatibility (reuse your computeCompatibility function if available)
+filteredApps.forEach(app => {
+  app.score = typeof computeCompatibility === 'function'
+    ? computeCompatibility(app, mentorProfile)
+    : 0;
+});
+
   // Compute compatibility (reuse your computeCompatibility function if available)
   filteredApps.forEach(app => {
     app.score = typeof computeCompatibility === 'function'
@@ -1262,35 +1324,50 @@ async function loadMenteeRecommendations() {
   filteredApps.sort((a, b) => (b.score || 0) - (a.score || 0));
 
   // Render cards
-  recSection.innerHTML = '';
-  filteredApps.forEach(app => {
-    const div = document.createElement('div');
-    div.className = 'application-card';
-    div.innerHTML = `
-      <strong>Name:</strong>
-      <h3 style="font-weight: 400; color: #0f172a; margin: 0;">
-        ${app.name || 'Unknown'}
-        <span style="font-weight:400; color:#64748b; font-size:1rem; margin-left:0.5rem;">
-          (${app.score || 0}% Match)
-        </span>
-      </h3>
-      <strong>Learning Outcome:</strong>
-      <div>${app.learning_outcome || ''}</div>
-      <strong>Skills:</strong>
-      <div>${(app.skills || []).join(', ')}</div>
-      <strong>Learning Styles:</strong>
-      <div>${(app.learning_style || []).join(', ')}</div>
-      <strong>Communication Modes:</strong>
-      <div>${(app.comm_mode || []).join(', ')}</div>
-      <button class="btn btn-primary full-width" onclick="requestMentorshipFromMentor('${app.id}', this)">
-        <i class="fa fa-paper-plane"></i> Send Mentorship Request
-      </button>
-    `;
-    recSection.appendChild(div);
-  });
+recSection.innerHTML = '';
+if (filteredApps.length === 0) {
+  recSection.innerHTML = `
+  <div class="empty" style="background:#f8fafc; color:#111827; border-left:4px solid #e5e7eb; padding:1.2rem 2rem; border-radius:0.5rem; margin:1.5rem 0; width:100%; max-width:100%; box-sizing:border-box; text-align:left;">
+    <i class="fa fa-info-circle" style="margin-right:0.5rem; color:#94a3b8;"></i>
+    No mentee applications found that match your profile.
+  </div>
+`;
+  return;
+}
+filteredApps.forEach(app => {
+  const applicant = userMap[app.user_id] || {};
+  const div = document.createElement('div');
+  div.className = 'application-card';
+  div.innerHTML = `
+    <strong>Name:</strong>
+    <h3 style="font-weight: 400; color: #0f172a; margin: 0;">
+      ${(applicant.name) || 'Unknown'}
+      <span style="font-weight:400; color:#64748b; font-size:1rem; margin-left:0.5rem;">
+        (${app.score || 0}% Match)
+      </span>
+    </h3>
+    <strong>Learning Outcome:</strong>
+    <div>${app.learning_outcome || ''}</div>
+    <strong>Skills:</strong>
+    <div>${(app.skills || []).join(', ')}</div>
+    <strong>Learning Styles:</strong>
+    <div>${(app.learning_style || []).join(', ')}</div>
+    <strong>Communication Modes:</strong>
+    <div>${(app.comm_mode || []).join(', ')}</div>
+    <button class="btn btn-primary full-width" onclick="requestMentorshipFromMentor('${app.id}', this)">
+      <i class="fa fa-paper-plane"></i> Send Mentorship Request
+    </button>
+  `;
+  recSection.appendChild(div);
+});
 
   if (filteredApps.length === 0) {
-    recSection.innerHTML = '<div class="empty">No mentee applications found that match your profile.</div>';
+    recSection.innerHTML = `
+  <div class="empty" style="background:#f8fafc; color:#111827; border-left:4px solid #e5e7eb; padding:1.2rem 2rem; border-radius:0.5rem; margin:1.5rem 0; width:100%; max-width:100%; box-sizing:border-box; text-align:left;">
+    <i class="fa fa-info-circle" style="margin-right:0.5rem; color:#94a3b8;"></i>
+    No mentee applications found that match your profile.
+  </div>
+`;
   }
 }
 
@@ -1301,28 +1378,42 @@ async function requestMentorshipFromMentor(appId, btn) {
   const user = session?.session?.user;
   if (!user) return;
 
-  const { error } = await supabase.from('mentorships').insert([
-    { mentor_id: user.id, application_id: appId, status: 'pending' }
-  ]);
-  if (error) {
+  // Fetch the application to get the mentee's user_id
+  const { data: appData, error: appFetchError } = await supabase
+    .from('mentor_applications')
+    .select('user_id')
+    .eq('id', appId)
+    .single();
+
+  if (appFetchError || !appData) {
     btn.textContent = 'Failed';
     btn.classList.add('btn-danger');
-    alert('Failed to send mentorship request.');
-  } else {
-    btn.textContent = 'Request Sent';
-    btn.classList.remove('btn-primary');
-    btn.classList.add('btn-success');
+    alert('Failed to fetch application.');
+    return;
   }
-}
 
-document.addEventListener('click', async function(e) {
-  if (e.target.classList.contains('findMenteesBtn')) {
-    e.preventDefault();
-    const recSection = document.querySelector('.scroll-container.mentee-recommendations');
-    const section = recSection.closest('section') || recSection;
-    recSection.classList.remove('hidden');
-    recSection.style.display = '';
-    await loadMenteeRecommendations();
-    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
-});
+  // 1. Insert mentorship with status 'active' and mentee_id
+  const { error } = await supabase.from('mentorships').insert([
+    { mentor_id: user.id, mentee_id: appData.user_id, application_id: appId, status: 'active' }
+  ]);
+
+  // 2. Update the mentor_applications status to 'active'
+  const { error: appError } = await supabase
+    .from('mentor_applications')
+    .update({ status: 'active' })
+    .eq('id', appId);
+
+  if (error || appError) {
+  btn.textContent = 'Failed';
+  btn.classList.add('btn-danger');
+  alert('Failed to send mentorship request.');
+} else {
+  btn.textContent = 'Mentorship Active';
+  btn.classList.remove('btn-primary');
+  btn.classList.add('btn-success');
+  // Reload views so the new mentee appears as active
+  loadMentorAndMenteeViews();
+  loadMenteeApplications();
+  loadMentorApplications();
+}
+}
