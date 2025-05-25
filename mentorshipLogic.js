@@ -245,6 +245,7 @@ async function acceptMentee(mentorshipId, btn) {
     btn.classList.add('btn-secondary');
     loadMentorAndMenteeViews();
      loadMenteeApplications();
+      loadMentorApplications();
   }
 }
 
@@ -300,10 +301,11 @@ async function loadRecommendationsForApplication(app, mentorIds = null) {
   }
 
   // If mentorIds is provided, filter mentors
-  let filteredMentors = mentors;
-  if (mentorIds && Array.isArray(mentorIds)) {
-    filteredMentors = mentors.filter(m => mentorIds.includes(m.id));
-  }
+ let filteredMentors = mentors.filter(m => m.id !== user.id);
+
+if (mentorIds && Array.isArray(mentorIds)) {
+  filteredMentors = filteredMentors.filter(m => mentorIds.includes(m.id));
+}
 
   // Use filteredMentors instead of mentors in your rendering loop
   filteredMentors.forEach(mentor => {
@@ -319,14 +321,20 @@ async function loadRecommendationsForApplication(app, mentorIds = null) {
     let btnHtml = '';
 if (existing && existing.status === 'pending') {
   btnHtml = `
-    <button class="btn btn-success" disabled style="margin-bottom:0.5rem;display:block;width:100%;font-size:1.1rem;line-height:1.5;padding:0.2rem 0.6rem;">Request Sent</button>
-    <button class="btn" style="background:#e5e7eb;color:#374151;box-shadow:none;padding:0.2rem 0.6rem;font-size:1.1rem;line-height:1.5;display:block;width:100%;margin-top:0.5rem;font-family:inherit;" title="Withdraw" data-mentorship-id="${existing.id}" data-app-id="${app.id}" onclick="handleWithdrawClick(this)">Withdraw</button>
+    <button class="btn btn-success" disabled>Request Sent</button>
+    <button class="btn"
+      data-mentorship-id="${existing.id}"
+      data-app-id="${app.id}"
+      onclick="handleWithdrawClick(this)">Withdraw</button>
   `;
 } else if (existing && existing.status === 'active') {
   btnHtml = `<button class="btn btn-secondary" disabled>Mentorship Active</button>`;
 } else if (existing && existing.status === 'completed') {
   btnHtml = `<button class="btn btn-secondary" disabled>Completed</button>`;
+} else if (existing && existing.status === 'rejected') {
+  btnHtml = `<button class="btn btn-danger" disabled>Rejected</button>`;
 } else {
+  // No mentorship or not rejected for this mentor+app, allow re-apply
   btnHtml = `<button class="btn btn-primary" onclick='requestMentorship("${app.id}", "${mentor.id}", this, ${JSON.stringify(app)})'>Request Mentorship</button>`;
 }
 
@@ -363,43 +371,6 @@ if (existing && existing.status === 'pending') {
 }
 
 // Request/cancel mentorship (mentee side)
-async function requestMentorship(appId, mentorId, btn, app) {
-  const { data: session } = await supabase.auth.getSession();
-  const user = session?.session?.user;
-  if (!user) return;
-
-  btn.disabled = true;
-btn.textContent = 'Sending...';
-
-const { error } = await supabase.from('mentorships').insert({
-  mentee_id: user.id,
-  mentor_id: mentorId,
-  application_id: appId,
-  status: 'pending',
-  compatibility_score: 0
-});
-
-if (error) {
-  alert("Failed to send request.");
-  console.error(error);
-  btn.disabled = false;
-  btn.textContent = 'Request Mentorship';
-} else {
-  // Update the button immediately for instant feedback
-  btn.textContent = 'Request Sent';
-  btn.classList.remove('btn-primary');
-  btn.classList.add('btn-success');
-
-  // Wait a bit longer for the DB to update, then reload recommendations
-  setTimeout(() => {
-    loadRecommendationsForApplication(app);
-    loadMentorAndMenteeViews();
-     loadMenteeApplications();
-      loadMentorApplications();
-  }, 800); // 800ms delay
-}
-
-}
 
 async function cancelMentorship(mentorId, btn) {
   const { data: session } = await supabase.auth.getSession();
@@ -460,10 +431,303 @@ async function loadRecommendationsForApplication(app, mentorIds = null) {
   }
 
   // If mentorIds is provided, filter mentors
-  let filteredMentors = mentors;
-  if (mentorIds && Array.isArray(mentorIds)) {
-    filteredMentors = mentors.filter(m => mentorIds.includes(m.id));
+let filteredMentors = mentors.filter(m => m.id !== user.id);
+
+if (mentorIds && Array.isArray(mentorIds)) {
+  filteredMentors = filteredMentors.filter(m => mentorIds.includes(m.id));
+}
+
+  // Use filteredMentors instead of mentors in your rendering loop
+  filteredMentors.forEach(mentor => {
+    let score = typeof mentor.score === 'number'
+      ? mentor.score
+      : (typeof computeCompatibility === 'function' ? computeCompatibility(app, mentor) : 0);
+
+    // Check if a mentorship already exists with this mentor
+    const existing = myMentorships?.find(
+      m => m.mentor_id === mentor.id && m.application_id === app.id
+    );
+     console.log('Mentor:', mentor.name, 'Existing mentorship:', existing);
+
+
+    let btnHtml = '';
+if (existing && existing.status === 'pending') {
+  btnHtml = `
+  <button class="btn btn-success" disabled>Request Sent</button>
+  <button class="btn"
+    data-mentorship-id="${existing.id}"
+    data-app-id="${app.id}"
+    onclick="handleWithdrawClick(this)">Withdraw</button>
+`;
+} else if (existing && existing.status === 'active') {
+  btnHtml = `<button class="btn btn-secondary" disabled>Mentorship Active</button>`;
+} else if (existing && existing.status === 'completed') {
+  btnHtml = `<button class="btn btn-secondary" disabled>Completed</button>`; // ✅ Add this line
+} else {
+  btnHtml = `<button class="btn btn-primary" onclick='requestMentorship("${app.id}", "${mentor.id}", this, ${JSON.stringify(app)})'>Request Mentorship</button>`;
+}
+
+    const div = document.createElement('div');
+    div.className = 'application-card';
+    div.style.position = 'relative';
+    // Ensure consistent font family and size
+    div.style.fontFamily = 'inherit';
+    div.style.fontSize = '1rem';
+
+    div.innerHTML = `
+      <strong>Name:</strong>
+      <h3 style="font-weight: 400; color: #0f172a; margin: 0; font-family:inherit; font-size:1.1rem;">
+        ${mentor.name}
+        <span style="font-weight:400; color:#64748b; font-size:1rem; margin-left:0.5rem; font-family:inherit;">
+          (${score || 0}% Match)
+        </span>
+      </h3>
+      <strong>Description:</strong>
+      <div style="font-family:inherit; font-size:1rem;"><em>${mentor.description || ''}</em></div>
+      <strong>Skills:</strong>
+      <div style="font-family:inherit; font-size:1rem;">${(mentor.skills || []).join(', ')}</div>
+      <strong>Learning Styles:</strong>
+      <div style="font-family:inherit; font-size:1rem;">${(mentor.learning_style || []).join(', ')}</div>
+      <strong>Communication Modes:</strong>
+      <div style="font-family:inherit; font-size:1rem;">${(mentor.comm_mode || []).join(', ')}</div>
+      ${btnHtml}
+    `;
+    container.appendChild(div);
+  });
+
+  // Scroll to mentor recommendations section after rendering
+  container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+// Request/cancel mentorship (mentee side)
+
+async function requestMentorship(appId, mentorId, btn, app) {
+  const { data: session } = await supabase.auth.getSession();
+  const user = session?.session?.user;
+  if (!user) return;
+
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+
+  const { error } = await supabase.from('mentorships').insert({
+    mentee_id: user.id,
+    mentor_id: mentorId,
+    application_id: appId,
+    status: 'pending',
+    compatibility_score: 0
+  });
+
+  if (error) {
+    alert("Failed to send request.");
+    console.error(error);
+    btn.disabled = false;
+    btn.textContent = 'Request Mentorship';
+  } else {
+    btn.textContent = 'Request Sent';
+    btn.classList.remove('btn-primary');
+    btn.classList.add('btn-success');
+    setTimeout(() => {
+      loadRecommendationsForApplication(app);
+      loadMentorAndMenteeViews();
+      loadMenteeApplications();
+      loadMentorApplications(); // <-- This is important!
+    }, 800);
   }
+}
+async function cancelMentorship(mentorId, btn) {
+  const { data: session } = await supabase.auth.getSession();
+  const user = session?.session?.user;
+  if (!user) return;
+
+  const confirmed = confirm('Are you sure you want to cancel this mentorship request?');
+  if (!confirmed) return;
+
+  const { error } = await supabase.from('mentorships')
+    .delete()
+    .eq('mentee_id', user.id)
+    .eq('mentor_id', mentorId)
+    .eq('status', 'pending');
+
+  if (error) {
+    alert("Failed to cancel request.");
+    console.error(error);
+  } else {
+    alert("Request canceled.");
+    loadMentorAndMenteeViews();
+    // Optionally reload recommendations if you want to update that section too
+    // loadRecommendationsForApplication(...);
+  }
+}
+
+// Mentor recommendations for a mentee application (separate section)
+async function loadRecommendationsForApplication(app, mentorIds = null) {
+  const { data: session } = await supabase.auth.getSession();
+  const user = session?.session?.user;
+  if (!user) return;
+
+  // Fetch mentors matching the application
+  const { data: mentors, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .overlaps('skills', app.skills)
+    .overlaps('learning_style', app.learning_style)
+    .overlaps('comm_mode', app.comm_mode);
+
+  // Fetch existing mentorships for this mentee
+  const { data: myMentorships } = await supabase
+    .from('mentorships')
+    .select('id,mentor_id, application_id, status')
+    .eq('mentee_id', user.id);
+
+  const container = document.querySelector('.scroll-container.mentor-recommendations');
+  container.innerHTML = '';
+
+  if (error) {
+    container.innerHTML = '<div class="error">Failed to load recommendations.</div>';
+    return;
+  }
+
+  if (!mentors || mentors.length === 0) {
+    container.innerHTML = '<div class="empty">No mentor recommendations found for this application.</div>';
+    return;
+  }
+
+  // If mentorIds is provided, filter mentors
+  let filteredMentors = mentors.filter(m => m.id !== user.id);
+
+if (mentorIds && Array.isArray(mentorIds)) {
+  filteredMentors = filteredMentors.filter(m => mentorIds.includes(m.id));
+}
+
+  // Use filteredMentors instead of mentors in your rendering loop
+  filteredMentors.forEach(mentor => {
+    let score = typeof mentor.score === 'number'
+      ? mentor.score
+      : (typeof computeCompatibility === 'function' ? computeCompatibility(app, mentor) : 0);
+
+    // Check if a mentorship already exists with this mentor
+    const existing = myMentorships?.find(
+      m => m.mentor_id === mentor.id && m.application_id === app.id
+    );
+
+    let btnHtml = '';
+if (existing && existing.status === 'pending') {
+  btnHtml = `
+  <button class="btn btn-success" disabled>Request Sent</button>
+  <button class="btn"
+    data-mentorship-id="${existing.id}"
+    data-app-id="${app.id}"
+    onclick="handleWithdrawClick(this)">Withdraw</button>
+`;
+} else if (existing && existing.status === 'active') {
+  btnHtml = `<button class="btn btn-secondary" disabled>Mentorship Active</button>`;
+} else if (existing && existing.status === 'completed') {
+  btnHtml = `<button class="btn btn-secondary" disabled>Completed</button>`; // ✅ Add this line
+} else {
+  btnHtml = `<button class="btn btn-primary" onclick='requestMentorship("${app.id}", "${mentor.id}", this, ${JSON.stringify(app)})'>Request Mentorship</button>`;
+}
+
+    const div = document.createElement('div');
+    div.className = 'application-card';
+    div.style.position = 'relative';
+    // Ensure consistent font family and size
+    div.style.fontFamily = 'inherit';
+    div.style.fontSize = '1rem';
+
+    div.innerHTML = `
+      <strong>Name:</strong>
+      <h3 style="font-weight: 400; color: #0f172a; margin: 0; font-family:inherit; font-size:1.1rem;">
+        ${mentor.name}
+        <span style="font-weight:400; color:#64748b; font-size:1rem; margin-left:0.5rem; font-family:inherit;">
+          (${score || 0}% Match)
+        </span>
+      </h3>
+      <strong>Description:</strong>
+      <div style="font-family:inherit; font-size:1rem;"><em>${mentor.description || ''}</em></div>
+      <strong>Skills:</strong>
+      <div style="font-family:inherit; font-size:1rem;">${(mentor.skills || []).join(', ')}</div>
+      <strong>Learning Styles:</strong>
+      <div style="font-family:inherit; font-size:1rem;">${(mentor.learning_style || []).join(', ')}</div>
+      <strong>Communication Modes:</strong>
+      <div style="font-family:inherit; font-size:1rem;">${(mentor.comm_mode || []).join(', ')}</div>
+      ${btnHtml}
+    `;
+    container.appendChild(div);
+  });
+
+  // Scroll to mentor recommendations section after rendering
+  container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+// Request/cancel mentorship (mentee side)
+
+async function cancelMentorship(mentorId, btn) {
+  const { data: session } = await supabase.auth.getSession();
+  const user = session?.session?.user;
+  if (!user) return;
+
+  const confirmed = confirm('Are you sure you want to cancel this mentorship request?');
+  if (!confirmed) return;
+
+  const { error } = await supabase.from('mentorships')
+    .delete()
+    .eq('mentee_id', user.id)
+    .eq('mentor_id', mentorId)
+    .eq('status', 'pending');
+
+  if (error) {
+    alert("Failed to cancel request.");
+    console.error(error);
+  } else {
+    alert("Request canceled.");
+    loadMentorAndMenteeViews();
+    // Optionally reload recommendations if you want to update that section too
+    // loadRecommendationsForApplication(...);
+  }
+}
+
+// Mentor recommendations for a mentee application (separate section)
+async function loadRecommendationsForApplication(app, mentorIds = null) {
+  const { data: session } = await supabase.auth.getSession();
+  const user = session?.session?.user;
+  if (!user) return;
+
+  // Fetch mentors matching the application
+  const { data: mentors, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .overlaps('skills', app.skills)
+    .overlaps('learning_style', app.learning_style)
+    .overlaps('comm_mode', app.comm_mode);
+
+    
+
+  // Fetch existing mentorships for this mentee
+  const { data: myMentorships } = await supabase
+    .from('mentorships')
+    .select('id,mentor_id, application_id, status')
+    .eq('mentee_id', user.id);
+
+  const container = document.querySelector('.scroll-container.mentor-recommendations');
+  container.innerHTML = '';
+
+  if (error) {
+    container.innerHTML = '<div class="error">Failed to load recommendations.</div>';
+    return;
+  }
+
+  if (!mentors || mentors.length === 0) {
+    container.innerHTML = '<div class="empty">No mentor recommendations found for this application.</div>';
+    return;
+  }
+
+  // If mentorIds is provided, filter mentors
+  // Filter out the current user from mentors
+let filteredMentors = mentors.filter(m => m.id !== user.id);
+
+if (mentorIds && Array.isArray(mentorIds)) {
+  filteredMentors = filteredMentors.filter(m => mentorIds.includes(m.id));
+}
 
   // Use filteredMentors instead of mentors in your rendering loop
   filteredMentors.forEach(mentor => {
@@ -532,200 +796,33 @@ async function requestMentorship(appId, mentorId, btn, app) {
   if (!user) return;
 
   btn.disabled = true;
-btn.textContent = 'Sending...';
+  btn.textContent = 'Sending...';
 
-const { error } = await supabase.from('mentorships').insert({
-  mentee_id: user.id,
-  mentor_id: mentorId,
-  application_id: appId,
-  status: 'pending',
-  compatibility_score: 0
-});
-
-if (error) {
-  alert("Failed to send request.");
-  console.error(error);
-  btn.disabled = false;
-  btn.textContent = 'Request Mentorship';
-} else {
-  // Update the button immediately for instant feedback
-  btn.textContent = 'Request Sent';
-  btn.classList.remove('btn-primary');
-  btn.classList.add('btn-success');
-
-  // Wait a bit longer for the DB to update, then reload recommendations
-  setTimeout(() => {
-    loadRecommendationsForApplication(app);
-    loadMentorAndMenteeViews();
-     loadMenteeApplications();
-       loadMentorApplications(); 
-  }, 800); // 800ms delay
-}
-
-}
-
-async function cancelMentorship(mentorId, btn) {
-  const { data: session } = await supabase.auth.getSession();
-  const user = session?.session?.user;
-  if (!user) return;
-
-  const confirmed = confirm('Are you sure you want to cancel this mentorship request?');
-  if (!confirmed) return;
-
-  const { error } = await supabase.from('mentorships')
-    .delete()
-    .eq('mentee_id', user.id)
-    .eq('mentor_id', mentorId)
-    .eq('status', 'pending');
-
-  if (error) {
-    alert("Failed to cancel request.");
-    console.error(error);
-  } else {
-    alert("Request canceled.");
-    loadMentorAndMenteeViews();
-    // Optionally reload recommendations if you want to update that section too
-    // loadRecommendationsForApplication(...);
-  }
-}
-
-// Mentor recommendations for a mentee application (separate section)
-async function loadRecommendationsForApplication(app, mentorIds = null) {
-  const { data: session } = await supabase.auth.getSession();
-  const user = session?.session?.user;
-  if (!user) return;
-
-  // Fetch mentors matching the application
-  const { data: mentors, error } = await supabase
-    .from('profiles')
-    .select('*')
-    .overlaps('skills', app.skills)
-    .overlaps('learning_style', app.learning_style)
-    .overlaps('comm_mode', app.comm_mode);
-
-  // Fetch existing mentorships for this mentee
-  const { data: myMentorships } = await supabase
-    .from('mentorships')
-    .select('id,mentor_id, application_id, status')
-    .eq('mentee_id', user.id);
-
-  const container = document.querySelector('.scroll-container.mentor-recommendations');
-  container.innerHTML = '';
-
-  if (error) {
-    container.innerHTML = '<div class="error">Failed to load recommendations.</div>';
-    return;
-  }
-
-  if (!mentors || mentors.length === 0) {
-    container.innerHTML = '<div class="empty">No mentor recommendations found for this application.</div>';
-    return;
-  }
-
-  // If mentorIds is provided, filter mentors
-  let filteredMentors = mentors;
-  if (mentorIds && Array.isArray(mentorIds)) {
-    filteredMentors = mentors.filter(m => mentorIds.includes(m.id));
-  }
-
-  // Use filteredMentors instead of mentors in your rendering loop
-  filteredMentors.forEach(mentor => {
-    let score = typeof mentor.score === 'number'
-      ? mentor.score
-      : (typeof computeCompatibility === 'function' ? computeCompatibility(app, mentor) : 0);
-
-    // Check if a mentorship already exists with this mentor
-    const existing = myMentorships?.find(
-      m => m.mentor_id === mentor.id && m.application_id === app.id
-    );
-
-    let btnHtml = '';
-if (existing && existing.status === 'pending') {
-  btnHtml = `
-  <button class="btn btn-success" disabled>Request Sent</button>
-  <button class="btn"
-    data-mentorship-id="${existing.id}"
-    data-app-id="${app.id}"
-    onclick="handleWithdrawClick(this)">Withdraw</button>
-`;
-} else if (existing && existing.status === 'active') {
-  btnHtml = `<button class="btn btn-secondary" disabled>Mentorship Active</button>`;
-} else if (existing && existing.status === 'completed') {
-  btnHtml = `<button class="btn btn-secondary" disabled>Completed</button>`; // ✅ Add this line
-} else {
-  btnHtml = `<button class="btn btn-primary" onclick='requestMentorship("${app.id}", "${mentor.id}", this, ${JSON.stringify(app)})'>Request Mentorship</button>`;
-}
-
-    const div = document.createElement('div');
-    div.className = 'application-card';
-    div.style.position = 'relative';
-    // Ensure consistent font family and size
-    div.style.fontFamily = 'inherit';
-    div.style.fontSize = '1rem';
-
-    div.innerHTML = `
-      <strong>Name:</strong>
-      <h3 style="font-weight: 400; color: #0f172a; margin: 0; font-family:inherit; font-size:1.1rem;">
-        ${mentor.name}
-        <span style="font-weight:400; color:#64748b; font-size:1rem; margin-left:0.5rem; font-family:inherit;">
-          (${score || 0}% Match)
-        </span>
-      </h3>
-      <strong>Description:</strong>
-      <div style="font-family:inherit; font-size:1rem;"><em>${mentor.description || ''}</em></div>
-      <strong>Skills:</strong>
-      <div style="font-family:inherit; font-size:1rem;">${(mentor.skills || []).join(', ')}</div>
-      <strong>Learning Styles:</strong>
-      <div style="font-family:inherit; font-size:1rem;">${(mentor.learning_style || []).join(', ')}</div>
-      <strong>Communication Modes:</strong>
-      <div style="font-family:inherit; font-size:1rem;">${(mentor.comm_mode || []).join(', ')}</div>
-      ${btnHtml}
-    `;
-    container.appendChild(div);
+  const { error } = await supabase.from('mentorships').insert({
+    mentee_id: user.id,
+    mentor_id: mentorId,
+    application_id: appId,
+    status: 'pending',
+    compatibility_score: 0
   });
 
-  // Scroll to mentor recommendations section after rendering
-  container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  if (error) {
+    alert("Failed to send request.");
+    console.error(error);
+    btn.disabled = false;
+    btn.textContent = 'Request Mentorship';
+  } else {
+    btn.textContent = 'Request Sent';
+    btn.classList.remove('btn-primary');
+    btn.classList.add('btn-success');
+    setTimeout(() => {
+      loadRecommendationsForApplication(app);
+      loadMentorAndMenteeViews();
+      loadMenteeApplications();
+      loadMentorApplications(); // <-- This is important!
+    }, 800);
+  }
 }
-
-// Request/cancel mentorship (mentee side)
-async function requestMentorship(appId, mentorId, btn, app) {
-  const { data: session } = await supabase.auth.getSession();
-  const user = session?.session?.user;
-  if (!user) return;
-
-  btn.disabled = true;
-btn.textContent = 'Sending...';
-
-const { error } = await supabase.from('mentorships').insert({
-  mentee_id: user.id,
-  mentor_id: mentorId,
-  application_id: appId,
-  status: 'pending',
-  compatibility_score: 0
-});
-
-if (error) {
-  alert("Failed to send request.");
-  console.error(error);
-  btn.disabled = false;
-  btn.textContent = 'Request Mentorship';
-} else {
-  // Update the button immediately for instant feedback
-  btn.textContent = 'Request Sent';
-  btn.classList.remove('btn-primary');
-  btn.classList.add('btn-success');
-
-  // Wait a bit longer for the DB to update, then reload recommendations
-  setTimeout(() => {
-    loadRecommendationsForApplication(app);
-    loadMentorAndMenteeViews();
-     loadMenteeApplications();
-  }, 800); // 800ms delay
-}
-
-}
-
 async function cancelMentorship(mentorId, btn) {
   const { data: session } = await supabase.auth.getSession();
   const user = session?.session?.user;
@@ -855,7 +952,23 @@ async function loadMenteeApplications() {
   const active = [];
   const completed = [];
 
+
   applications.forEach(app => {
+
+    // Find mentorship for this application
+  const mentorship = myMentorships?.find(
+    m => m.application_id === app.id
+  );
+
+  // Determine decision
+  let decision = 'pending';
+  if (mentorship) {
+    if (mentorship.status === 'active') decision = 'accepted';
+    else if (mentorship.status === 'rejected') decision = 'rejected';
+    else if (mentorship.status === 'pending') decision = 'pending';
+  }
+
+
     // Find mentorships for this application
     const activeMentorship = myMentorships?.find(
       m => m.application_id === app.id && m.status === 'active'
@@ -865,9 +978,19 @@ async function loadMenteeApplications() {
   m => m.application_id === app.id && (m.status === 'active' || m.status === 'completed' || m.status === 'dissolved')
 );
 
+// Add this:
+let statusText = 'Pending';
+if (app.status === 'completed' || completedMentorship?.status === 'completed') {
+  statusText = 'Completed';
+} else if (activeMentorship) {
+  statusText = 'Active';
+}
+
     const hasMentorRequest = myMentorships?.some(
   m => m.application_id === app.id
 );
+
+
 
     // Discard button: always disabled for active/completed
     const hasActiveOrCompletedMentorship = myMentorships?.some(
@@ -910,9 +1033,14 @@ const actionBtns = (app.status === 'completed' || hasMentorRequest) ? `
     <strong>Learning Outcome:</strong> ${app.learning_outcome}<br>
     <strong>Skills:</strong> ${app.skills?.join(', ')}<br>
     <strong>Learning Styles:</strong> ${app.learning_style?.join(', ')}<br>
-    <strong>Communication Modes:</strong> ${app.comm_mode?.join(', ')}<br>
-    <small>Status: Completed</small><br>
-    <small>Submitted: ${new Date(app.created_at).toLocaleString()}</small>
+    <strong>Communication Modes:</strong> ${app.comm_mode?.join(', ')}<br><br>
+    <small>Created: ${new Date(app.created_at).toLocaleString()}</small>
+    <small>Status: ${statusText}</small>
+      <button class="btn btn-primary full-width" onclick="scrollToApplication('${app.id}')">
+    <i class="fa fa-eye"></i> View Application
+  </button>
+    
+  
   `;
   // Allow click to view mentor recommendations for the matched mentor only
   div.addEventListener('click', () => {
@@ -942,9 +1070,17 @@ const actionBtns = (app.status === 'completed' || hasMentorRequest) ? `
         <strong>Learning Outcome:</strong> ${app.learning_outcome}<br>
         <strong>Skills:</strong> ${app.skills?.join(', ')}<br>
         <strong>Learning Styles:</strong> ${app.learning_style?.join(', ')}<br>
-        <strong>Communication Modes:</strong> ${app.comm_mode?.join(', ')}<br>
-        <small>Status: Active</small><br>
-        <small>Submitted: ${new Date(app.created_at).toLocaleString()}</small>
+        <strong>Communication Modes:</strong> ${app.comm_mode?.join(', ')}<br><br>
+        <small>Created: ${new Date(app.created_at).toLocaleString()}</small>
+        <small>Status: ${statusText}</small>
+          <button class="btn btn-primary full-width" onclick="scrollToApplication('${app.id}')">
+    <i class="fa fa-eye"></i> View Application
+  </button>
+     <!-- Add dissolve button below -->
+    <button class="btn btn-danger full-width" style="margin-top:0.5rem;" onclick="dissolveMentor('${activeMentorship.id}', this)">
+      <i class="fa fa-unlink"></i> Dissolve Mentorship
+    </button>
+
       `;
       div.addEventListener('click', () => {
         highlightSelectedApplication(div);
@@ -957,15 +1093,56 @@ const actionBtns = (app.status === 'completed' || hasMentorRequest) ? `
       return;
     }
 
+    // Rejected
+if (mentorship && mentorship.status === 'rejected') {
+  div.classList.add('inactive');
+  div.style.background = '#f3f4f6';
+  div.style.border = '2px solid #e5e7eb';
+  div.style.opacity = '0.7';
+  div.style.filter = 'grayscale(0.7)';
+  div.innerHTML = `
+    <div style="position:absolute;top:0.5rem;left:0.5rem;">
+      <i class="fa fa-ban" title="This application is rejected." style="color:#9ca3af;font-size:1.3rem;"></i>
+    </div>
+    ${actionBtns}
+    <strong>Learning Outcome:</strong> ${app.learning_outcome}<br>
+    <strong>Skills:</strong> ${app.skills?.join(', ')}<br>
+    <strong>Learning Styles:</strong> ${app.learning_style?.join(', ')}<br>
+    <strong>Communication Modes:</strong> ${app.comm_mode?.join(', ')}<br><br>
+    <small>Created: ${new Date(app.created_at).toLocaleString()}</small>
+    <small>Status: Rejected</small>
+    <small>Decision: Rejected</small>
+    <button class="btn btn-primary full-width" onclick="scrollToApplication('${app.id}')">
+      <i class="fa fa-eye"></i> View Application
+    </button>
+  `;
+  div.addEventListener('click', () => {
+    highlightSelectedApplication(div);
+    const recSection = document.querySelector('.scroll-container.mentor-recommendations');
+    recSection.classList.add('hidden');
+    recSection.style.display = 'none';
+    recSection.innerHTML = '';
+  });
+  completed.push({ div, created_at: app.created_at });
+  return;
+}
+
     // Pending/normal
     div.innerHTML = `
       ${actionBtns}
       <strong>Learning Outcome:</strong> ${app.learning_outcome}<br>
       <strong>Skills:</strong> ${app.skills?.join(', ')}<br>
       <strong>Learning Styles:</strong> ${app.learning_style?.join(', ')}<br>
-      <strong>Communication Modes:</strong> ${app.comm_mode?.join(', ')}<br>
-      <small>Status: Pending</small><br>
-      <small>Submitted: ${new Date(app.created_at).toLocaleString()}</small>
+      <strong>Communication Modes:</strong> ${app.comm_mode?.join(', ')}<br><br>
+      <small>Created: ${new Date(app.created_at).toLocaleString()}</small>
+       <small>Status: ${statusText}</small>
+      <small>Decision: ${decision.charAt(0).toUpperCase() + decision.slice(1)}</small>
+        <button class="btn btn-primary full-width" onclick="scrollToApplication('${app.id}')">
+    <i class="fa fa-eye"></i> View Application
+  </button>
+    
+    
+
     `;
     div.addEventListener('click', () => {
       highlightSelectedApplication(div);
@@ -1023,7 +1200,7 @@ async function dissolveMentor(mentorshipId, btn) {
   btn.disabled = true;
 
   // Get the mentorship to find the application_id
-  const { data: mentorships, error: fetchError } = await supabase
+  const { data: mentorship, error: fetchError } = await supabase
     .from('mentorships')
     .select('application_id')
     .eq('id', mentorshipId)
@@ -1050,16 +1227,17 @@ async function dissolveMentor(mentorshipId, btn) {
   }
 
   // Update the related application status to 'completed'
-  if (mentorships?.application_id) {
+  if (mentorship?.application_id) {
     await supabase
       .from('mentor_applications')
       .update({ status: 'completed' })
-      .eq('id', mentorships.application_id);
+      .eq('id', mentorship.application_id);
   }
 
   alert('Mentorship dissolved.');
   loadMentorAndMenteeViews();
   loadMenteeApplications();
+  loadMentorApplications(); // <-- Ensure mentor view updates
 }
 
 function scrollToApplication(appId) {
@@ -1074,6 +1252,8 @@ function scrollToApplication(appId) {
 
   // Highlight the application card and scroll it into view within the section
   const appCard = document.querySelector(`.application-card[data-app-id="${appId}"]`);
+    console.log('Trying to scroll to appId:', appId, 'Found:', !!appCard, appCard);
+
   if (appCard) {
     highlightSelectedApplication(appCard);
     appCard.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
@@ -1112,10 +1292,10 @@ function handleWithdrawClick(btn) {
         if (app) loadRecommendationsForApplication(app);
         loadMentorAndMenteeViews();
         loadMenteeApplications();
+        loadMentorApplications(); // <-- Add this line
       }
     });
 }
-
 
 async function loadMentorApplications() {
   const { data: session } = await supabase.auth.getSession();
@@ -1203,30 +1383,40 @@ async function loadMentorApplications() {
   }
 
   return `
-    <div class="application-card" data-app-id="${m.application_id}" style="${cardStyle} position:relative;">
-      <strong>Name:</strong>
-      <h3 style="font-weight: 400; color: #0f172a; margin: 0;">${mentee.name || 'Unknown'}</h3>
-      <strong>Learning Outcome:</strong>
-      <div>${app.learning_outcome || ''}</div>
-      <strong>Skills:</strong>
-      <div>${(app.skills || []).join(', ')}</div>
-      <strong>Learning Styles:</strong>
-      <div>${(app.learning_style || []).join(', ')}</div>
-      <strong>Communication Modes:</strong>
-      <div style="margin-bottom:0.5rem;">${(app.comm_mode || []).join(', ')}</div>
-      <div style="margin-top:0.5rem;">${statusHtml}</div>
-      ${m.status === 'completed'
+  <div class="application-card" data-app-id="${m.application_id}" style="${cardStyle} position:relative;">
+    <strong>Name:</strong>
+    <h3 style="font-weight: 400; color: #0f172a; margin: 0;">${mentee.name || 'Unknown'}</h3>
+    <strong>Learning Outcome:</strong>
+    <div>${app.learning_outcome || ''}</div>
+    <strong>Skills:</strong>
+    <div>${(app.skills || []).join(', ')}</div>
+    <strong>Learning Styles:</strong>
+    <div>${(app.learning_style || []).join(', ')}</div>
+    <strong>Communication Modes:</strong>
+    <div style="margin-bottom:0.5rem;">${(app.comm_mode || []).join(', ')}</div>
+    <div style="margin-top:0.5rem;">${statusHtml}</div>
+    ${
+      m.status === 'pending'
+        ? `<div style="margin-top:0.5rem;">
+            <button class="btn btn-success" onclick="acceptMentee('${m.id}', this)">Accept</button>
+            <button class="btn btn-danger" onclick="rejectMentee('${m.id}', this)">Reject</button>
+          </div>`
+        : m.status === 'completed'
         ? `<div style="position:absolute;top:0.5rem;left:0.5rem;">
             <i class="fa fa-lock" title="This application is completed." style="color:#6b7280;font-size:1.3rem;"></i>
            </div>`
         : m.status === 'active'
         ? `<div style="position:absolute;top:0.5rem;left:0.5rem;">
             <i class="fa fa-lock" title="This application is active." style="color:#059669;font-size:1.3rem;"></i>
-           </div>`
+           </div>
+           <button class="btn btn-danger full-width" style="margin-top:0.5rem;" onclick="dissolveMentor('${m.id}', this)">
+             <i class="fa fa-unlink"></i> Dissolve Mentorship
+           </button>
+           `
         : ''
-      }
-    </div>
-  `;
+    }
+  </div>
+`;
 }).join(''); }
 
   // Initial render
