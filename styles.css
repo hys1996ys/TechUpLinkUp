@@ -1022,3 +1022,7 @@ select[multiple] {
   padding: 0 2rem;
   overflow-x: auto;
 }
+
+.btn-filter[data-filter="rejected"] {
+  font-weight: normal !important;
+}
