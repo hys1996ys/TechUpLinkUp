@@ -1,15 +1,5 @@
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
 document.addEventListener('DOMContentLoaded', async () => {
-    // Fetch user session FIRST
-  const { data: sessionData } = await supabase.auth.getSession();
-  const user = sessionData?.session?.user;
 
-  // Redirect to home if not logged in
-  if (!user) {
-    window.location.href = 'index.html';
-    return;
-  }
   // Shared Elements
   const signInBtn = document.getElementById('openSignin');
   const signUpBtn = document.getElementById('openSignup');
@@ -143,9 +133,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   const learningStyleDisplay = document.getElementById('learningStyleDisplay');
   const profileCard = document.getElementById('profileCard');
   const toggleBtn = document.getElementById('toggleApplications');
+  const mentorWarning = document.getElementById('mentorWarning');
 
   let choicesInstance, commModeInstance, learningStyleInstance;
   let acceptingApplications = false;
+  let currentProfile = null;
 
   if (skillsSelect && commModeSelect && learningStyleSelect) {
     choicesInstance = new Choices(skillsSelect, {
@@ -210,6 +202,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       `<span class="badge">${style}</span>`).join('');
   }
 
+  function isProfileComplete(profile) {
+    return (
+      profile.name?.trim() &&
+      profile.designation?.trim() &&
+      profile.description?.trim() &&
+      Array.isArray(profile.skills) && profile.skills.length > 0 &&
+      Array.isArray(profile.comm_mode) && profile.comm_mode.length > 0 &&
+      Array.isArray(profile.learning_style) && profile.learning_style.length > 0
+    );
+  }
+
   async function loadProfile(userId, callback) {
     const { data, error } = await supabase
       .from('profiles')
@@ -218,6 +221,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       .single();
 
     if (data) {
+      currentProfile = data;
       nameInput.value = data.name || '';
       designationInput.value = data.designation || '';
       descriptionInput.value = data.description || '';
@@ -232,16 +236,27 @@ document.addEventListener('DOMContentLoaded', async () => {
       updateDisplay(data);
       if (callback) callback(data.name);
 
-      if (data.accepting_applications) {
-        acceptingApplications = true;
-        toggleBtn?.classList.add('active');
-        toggleBtn.textContent = 'Actively accepting applications';
-        document.getElementById('applicationStatus')?.classList.remove('hidden');
-      } else {
-        acceptingApplications = false;
+      // Mentor eligibility logic
+      if (!isProfileComplete(data)) {
+        toggleBtn?.setAttribute('disabled', 'disabled');
+        mentorWarning?.classList.remove('hidden');
         toggleBtn?.classList.remove('active');
         toggleBtn.textContent = 'Not accepting applications';
         document.getElementById('applicationStatus')?.classList.add('hidden');
+      } else {
+        toggleBtn?.removeAttribute('disabled');
+        mentorWarning?.classList.add('hidden');
+        if (data.accepting_applications) {
+          acceptingApplications = true;
+          toggleBtn?.classList.add('active');
+          toggleBtn.textContent = 'Actively accepting applications';
+          document.getElementById('applicationStatus')?.classList.remove('hidden');
+        } else {
+          acceptingApplications = false;
+          toggleBtn?.classList.remove('active');
+          toggleBtn.textContent = 'Not accepting applications';
+          document.getElementById('applicationStatus')?.classList.add('hidden');
+        }
       }
 
     } else if (error?.code === 'PGRST116') {
@@ -282,6 +297,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         updateDisplay(profileData);
         toggleEditMode(false);
         alert('Profile updated!');
+        // Reload profile to re-check completeness
+        loadProfile(user.id, showUserGreeting);
       } else {
         alert('Error saving profile: ' + error.message);
       }
@@ -292,6 +309,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   if (toggleBtn) {
     toggleBtn.addEventListener('click', async () => {
+      // Prevent toggling if profile is incomplete
+      if (!isProfileComplete(currentProfile)) {
+        mentorWarning?.classList.remove('hidden');
+        return;
+      }
+
       acceptingApplications = !acceptingApplications;
 
       toggleBtn.classList.toggle('active', acceptingApplications);

@@ -38,21 +38,22 @@
       <h1>Become a Mentor Today</h1>
       <p>Ready to share your expertise?</p>
       <p>
-        Complete your mentor profile to connect with mentees seeking guidance in your area of expertise.
+        <b>Complete your mentor profile </b> to connect with mentees seeking guidance in your area of expertise.
         Share your skills, learning styles, and communication styles to start making an impact.
       </p>
     </div>
-    <div class="cta-actions">
-            <button class="btn btn-primary" id="editBtn">
-        <i class="fa-solid fa-pen"></i> Be a Mentor
-      </button>
-      
-      <button id="toggleApplications" class="application-label">
-        Actively accepting applications
-      </button>
+<div class="cta-actions">
+  <button class="btn btn-primary" id="editBtn">
+    <i class="fa-solid fa-pen"></i> Be a Mentor
+  </button>
 
-    </div>
+  <div class="toggle-tooltip-wrapper">
+    <button id="toggleApplications" class="application-label">
+      Actively accepting applications
+    </button>
+
   </div>
+</div>
 </section>
 
 <section id="applicationStatus" class="hidden status-banner">
@@ -69,86 +70,96 @@
   <!-- Profile Card Box -->
   <section class="profile-card compact-view" id="profileCard">
 
-    <div class="profile-actions">
-      <button class="btn btn-success hidden" id="saveBtn">
-        <i class="fa-solid fa-save"></i> Save Changes
-      </button>
-    </div>
-
-   <div class="profile-row profile-details-grid">
-  <!-- Left Column -->
-<div class="profile-left">
-  <div class="top-section">
-    <div class="avatar-circle" id="avatarCircle">J</div>
-    <div class="profile-meta">
-      <h2 id="nameDisplay">Jasmine</h2>
-      <p id="designationDisplay" class="designation">Data Analyst</p>
-    </div>
+  <div class="profile-actions">
+    <button class="btn btn-success hidden" id="saveBtn">
+      <i class="fa-solid fa-save"></i> Save Changes
+    </button>
   </div>
 
-  <div class="tag-section description-section">
-    <strong>Description</strong>
-    <p id="descriptionDisplay" class="description">long text long text long text...</p>
+  <div class="profile-row profile-details-grid">
+    <!-- Left Column -->
+    <div class="profile-left">
+      <div class="top-section">
+        <div class="avatar-circle" id="avatarCircle"></div>
+        <div class="profile-meta">
+          <h2 id="nameDisplay"></h2>
+          <p id="designationDisplay" class="designation"></p>
+        </div>
+      </div>
+
+      <div class="tag-section description-section">
+        <strong>Description</strong>
+        <p id="descriptionDisplay" class="description"></p>
+      </div>
+
+      <!-- Edit fields (keep hidden) -->
+      <input type="text" id="name" class="profile-input hidden" placeholder="Your name" />
+      <input type="text" id="designation" class="profile-input hidden" placeholder="Job title" />
+      <textarea id="description" class="profile-input hidden" placeholder="Short description"></textarea>
+    </div>
+
+    <!-- Right Column -->
+    <div class="profile-right">
+      <div class="tag-section">
+        <strong>Skills</strong>
+        <div id="skillsDisplay" class="tag-list display-field"></div>
+        <select id="skills" class="profile-input hidden" multiple>
+          <option value="Leadership">Leadership</option>
+          <option value="Strategic Planning">Strategic Planning</option>
+          <option value="Team Management">Team Management</option>
+          <option value="Communication">Communication</option>
+          <option value="Project Management">Project Management</option>
+        </select>
+      </div>
+
+      <div class="tag-section">
+        <strong>Communication Mode</strong>
+        <div id="commModeDisplay" class="tag-list display-field"></div>
+        <select id="commMode" class="profile-input hidden" multiple>
+          <option value="Virtual">Virtual</option>
+          <option value="In-Person">In-Person</option>
+          <option value="Chat/Messaging">Chat/Messaging</option>
+          <option value="Flexible">Flexible</option>
+        </select>
+      </div>
+
+      <div class="tag-section">
+        <strong>Learning Styles</strong>
+        <div id="learningStyleDisplay" class="tag-list display-field"></div>
+        <select id="learningStyle" class="profile-input hidden" multiple>
+          <option value="Directed">Directed</option>
+          <option value="Co-directed">Co-directed</option>
+          <option value="Consulting">Consulting</option>
+          <option value="Self-directed">Self-directed</option>
+        </select>
+      </div>
+    </div>
   </div>
-
-  <!-- Edit fields (keep hidden) -->
-  <input type="text" id="name" class="profile-input hidden" placeholder="Your name" />
-  <input type="text" id="designation" class="profile-input hidden" placeholder="Job title" />
-  <textarea id="description" class="profile-input hidden" placeholder="Short description"></textarea>
-</div>
-
-
-  <!-- Right Column -->
-  <div class="profile-right">
-    <div class="tag-section">
-      <strong>Skills</strong>
-      <div id="skillsDisplay" class="tag-list display-field">
-        <span class="badge">Project Management</span>
-      </div>
-      <select id="skills" class="profile-input hidden" multiple>
-                      <option value="Leadership">Leadership</option>
-        <option value="Strategic Planning">Strategic Planning</option>
-        <option value="Team Management">Team Management</option>
-        <option value="Communication">Communication</option>
-        <option value="Project Management">Project Management</option>
-      </select>
-    </div>
-
-    <div class="tag-section">
-      <strong>Communication Mode</strong>
-      <div id="commModeDisplay" class="tag-list display-field">
-        <span class="badge">Flexible</span>
-      </div>
-      <select id="commMode" class="profile-input hidden" multiple>
-                    <option value="Virtual">Virtual</option>
-        <option value="In-Person">In-Person</option>
-        <option value="Chat/Messaging">Chat/Messaging</option>
-        <option value="Flexible">Flexible</option>
-      </select>
-    </div>
-
-    <div class="tag-section">
-      <strong>Learning Styles</strong>
-      <div id="learningStyleDisplay" class="tag-list display-field">
-        <span class="badge">Co-directed</span>
-      </div>
-      <select id="learningStyle" class="profile-input hidden" multiple>
-                        <option value="Directed">Directed</option>
-        <option value="Co-directed">Co-directed</option>
-        <option value="Consulting">Consulting</option>
-        <option value="Self-directed">Self-directed</option>
-      </select>
-    </div>
-  </div>
-</div>
-
- </section>
+</section>
 </main>
 
 <!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
-<script src="supabaseConfig.js"></script>
+<script src="supabaseConfig_profile.js"></script>
+
+<script>
+  (async () => {
+    let tries = 0;
+    while (!window.supabase && tries < 10) {
+      await new Promise(r => setTimeout(r, 100));
+      tries++;
+    }
+    if (!window.supabase) return;
+    const { data: earlySession } = await window.supabase.auth.getSession();
+    if (!earlySession?.session?.user) {
+      window.location.href = 'index.html';
+    }
+  })();
+</script>
+
+
+
 <script src="script.js"></script>
 
 </body>
