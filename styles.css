@@ -213,8 +213,7 @@ nav a {
 }
 
 .profile-section {
-  max-width: 960px;
-  width: 100%;
+  max-width: 100%;
   margin: 0 auto;
   padding: 2rem 1rem;
   display: flex;
@@ -990,7 +989,6 @@ select[multiple] {
 .scroll-container.mentee-pending {
   display: flex;
   flex-wrap: nowrap;
-  overflow-x: auto;
   gap: 1rem;
   width: 100%;
   padding-bottom: 1rem;
@@ -999,6 +997,8 @@ select[multiple] {
   /* Minimum width for 3 cards + 2 gaps (adjust card width if needed) */
   min-width: calc(3 * 420px + 2 * 1rem);
   /* Optional: set max-width if you want to limit container size */
+    overflow-x: auto;
+      justify-content: flex-start;
 }
 
 /* Optional) Make Cards Not Shrink */

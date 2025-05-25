@@ -6,34 +6,41 @@ let applicationFilter = 'all'; // global filter state
 function renderCard(profile, score, isPending = false, mentorshipId = null, isMentor = false) {
   // Only show avatar for mentee cards
   const avatar = isMentor ? '' : `<div class="avatar-circle-sm">${profile?.name?.charAt(0)?.toUpperCase() || 'U'}</div>`;
-  const skills = (profile.skills || []).map(skill => `<span class="badge">${skill}</span>`).join('');
-  const goals = (profile.learning_goals || profile.learning_style || []).map(g => `<span class="badge">${g}</span>`).join('');
   const matchBar = isPending && score !== null && score !== undefined
     ? `<div class="compat-label">${score}% Match</div><div class="compat-bar"><div class="compat-fill" style="width: ${score}%;"></div></div>`
     : '';
   const description = isMentor && profile.description
-  ? `<div style="margin-top:0.5rem;"><strong>Description</strong><div style="margin-bottom:0.5rem;"><em>${profile.description}</em></div></div>`
-  : '';
-  const commModes = isMentor && profile.comm_mode
-    ? `<strong>Communication Modes</strong><div class="badge-group">${(Array.isArray(profile.comm_mode) ? profile.comm_mode : [profile.comm_mode]).map(mode => `<span class="badge">${mode}</span>`).join('')}</div>`
+    ? `<strong style="display:block;margin-bottom:0.25rem;font-family:inherit;font-size:1rem;color:#007bff;">Description:</strong>
+       <div style="margin-bottom:0.75rem;font-family:inherit;font-size:1rem;"><em>${profile.description}</em></div>`
     : '';
+  // Mentor card: plain text, not badges, with spacing and font
+  const skills = isMentor
+    ? `<strong style="display:block;margin-bottom:0.25rem;font-family:inherit;font-size:1rem;color:#007bff;">Skills:</strong>
+       <div style="margin-bottom:0.75rem;font-family:inherit;font-size:1rem;">${(profile.skills || []).join(', ')}</div>`
+    : (profile.skills || []).map(skill => `<span class="badge">${skill}</span>`).join('');
   const learningStyles = isMentor && profile.learning_style
-    ? `<strong>Learning Styles</strong><div class="badge-group">${(Array.isArray(profile.learning_style) ? profile.learning_style : [profile.learning_style]).map(style => `<span class="badge">${style}</span>`).join('')}</div>`
+    ? `<strong style="display:block;margin-bottom:0.25rem;font-family:inherit;font-size:1rem;color:#007bff;">Learning Styles:</strong>
+       <div style="margin-bottom:0.75rem;font-family:inherit;font-size:1rem;">${(Array.isArray(profile.learning_style) ? profile.learning_style.join(', ') : profile.learning_style)}</div>`
+    : '';
+  const commModes = isMentor && profile.comm_mode
+    ? `<strong style="display:block;margin-bottom:0.25rem;font-family:inherit;font-size:1rem;color:#007bff;">Communication Modes:</strong>
+       <div style="margin-bottom:0.75rem;font-family:inherit;font-size:1rem;">${(Array.isArray(profile.comm_mode) ? profile.comm_mode.join(', ') : profile.comm_mode)}</div>`
     : '';
   const actionBtn = isPending && mentorshipId
     ? `<button class="btn btn-success full-width" onclick="acceptMentee('${mentorshipId}', this)">Accept</button>
        <button class="btn btn-danger full-width" onclick="rejectMentee('${mentorshipId}', this)">Reject</button>`
     : `<button class="btn btn-success full-width" onclick="scrollToApplication('${profile.application_id || ''}')"><i class="fa fa-eye"></i> View Application</button>`;
-  return `
-  <div class="mentee-card">
+
+return `
+  <div class="mentee-card" style="font-family:inherit;font-size:1rem;">
     ${avatar}
-    <h3>${profile.name}${profile.designation ? ` <span style="font-weight:400;color:#64748b;font-size:1rem;">(${profile.designation})</span>` : ''}</h3>
+    <h3 style="font-weight: bold; color: #007bff; margin: 0 0 0.5rem 0; font-family:inherit; font-size:1.1rem;">
+      ${profile.name}
+      ${profile.designation ? `<span style="font-weight:bold;color:#007bff;font-size:1rem; margin-left:0.5rem;">(${profile.designation})</span>` : ''}
+    </h3>
     ${description}
     ${matchBar}
-    <strong>Learning Goals</strong>
-    <div class="badge-group">${goals}</div>
-    <strong>Skills</strong>
-    <div class="badge-group">${skills}</div>
+    ${skills}
     ${learningStyles}
     ${commModes}
     ${actionBtn}
