@@ -4,45 +4,40 @@ let applicationFilter = 'all'; // global filter state
 
 // Renders a mentor or mentee profile card
 function renderCard(profile, score, isPending = false, mentorshipId = null, isMentor = false) {
+  // Only show avatar for mentee cards
   const avatar = isMentor ? '' : `<div class="avatar-circle-sm">${profile?.name?.charAt(0)?.toUpperCase() || 'U'}</div>`;
   const skills = (profile.skills || []).map(skill => `<span class="badge">${skill}</span>`).join('');
   const goals = (profile.learning_goals || profile.learning_style || []).map(g => `<span class="badge">${g}</span>`).join('');
   const matchBar = isPending && score !== null && score !== undefined
     ? `<div class="compat-label">${score}% Match</div><div class="compat-bar"><div class="compat-fill" style="width: ${score}%;"></div></div>`
     : '';
-  const nameLine = isMentor
-    ? `<h3>${profile.name}${profile.designation ? ` <span style="font-weight:400; color:#64748b;">(${profile.designation})</span>` : ''}</h3>`
-    : `<h3>${profile.name}</h3>`;
   const description = isMentor && profile.description
-    ? `<div style="height:0.5rem;"></div><strong>Description</strong><div style="margin-bottom:0.5rem;"><em>${profile.description}</em></div>`
-    : '';
-  const viewProfileBtn = isMentor
-  ? `<button class="btn btn-success full-width" onclick="scrollToApplication('${profile.application_id || ''}')"><i class="fa fa-eye"></i> View Application</button>`
+  ? `<div style="margin-top:0.5rem;"><strong>Description</strong><div style="margin-bottom:0.5rem;"><em>${profile.description}</em></div></div>`
   : '';
-  // Add Dissolve Mentor button for mentee's mentors
-  const dissolveBtn = (isMentor && mentorshipId)
-    ? `<button class="btn btn-danger full-width" style="margin-top:0.5rem" onclick="dissolveMentor('${mentorshipId}', this)">Dissolve Mentor</button>`
+  const commModes = isMentor && profile.comm_mode
+    ? `<strong>Communication Modes</strong><div class="badge-group">${(Array.isArray(profile.comm_mode) ? profile.comm_mode : [profile.comm_mode]).map(mode => `<span class="badge">${mode}</span>`).join('')}</div>`
     : '';
-
+  const learningStyles = isMentor && profile.learning_style
+    ? `<strong>Learning Styles</strong><div class="badge-group">${(Array.isArray(profile.learning_style) ? profile.learning_style : [profile.learning_style]).map(style => `<span class="badge">${style}</span>`).join('')}</div>`
+    : '';
   const actionBtn = isPending && mentorshipId
     ? `<button class="btn btn-success full-width" onclick="acceptMentee('${mentorshipId}', this)">Accept</button>
        <button class="btn btn-danger full-width" onclick="rejectMentee('${mentorshipId}', this)">Reject</button>`
-    : viewProfileBtn + dissolveBtn;
-
+    : `<button class="btn btn-success full-width" onclick="scrollToApplication('${profile.application_id || ''}')"><i class="fa fa-eye"></i> View Application</button>`;
   return `
-    <div class="mentee-card">
-      ${avatar}
-      ${nameLine}
-      ${description}
-      ${!isMentor ? `<p>${profile.designation || ''}</p>` : ''}
-      ${matchBar}
-      <strong>Learning Goals</strong>
-      <div class="badge-group">${goals}</div>
-      <div style="height:0.5rem;"></div>
-      <strong>Skills</strong>
-      <div class="badge-group">${skills}</div>
-      ${actionBtn}
-    </div>`;
+  <div class="mentee-card">
+    ${avatar}
+    <h3>${profile.name}${profile.designation ? ` <span style="font-weight:400;color:#64748b;font-size:1rem;">(${profile.designation})</span>` : ''}</h3>
+    ${description}
+    ${matchBar}
+    <strong>Learning Goals</strong>
+    <div class="badge-group">${goals}</div>
+    <strong>Skills</strong>
+    <div class="badge-group">${skills}</div>
+    ${learningStyles}
+    ${commModes}
+    ${actionBtn}
+  </div>`;
 }
 
 // Add/limit cards for mentors/mentees
@@ -102,30 +97,46 @@ async function loadMentorAndMenteeViews() {
     .select(`id, mentee_id, status, compatibility_score, mentee:profiles!mentorships_mentee_id_fkey (id, name, designation, skills, learning_goals)`)
     .eq('mentor_id', user.id);
 
-  const activeMentees = mentorships?.filter(m => m.status === 'active').slice(0, 3) || [];
   const pendingMentees = mentorships?.filter(m => m.status === 'pending')?.sort((a, b) => b.compatibility_score - a.compatibility_score) || [];
 
-  document.querySelector('.scroll-container.active').innerHTML =
-    activeMentees.map(m => renderCard(m.mentee, null, false)).join('') +
-    (activeMentees.length < 3 ? renderAddMenteeCard() : renderMenteeLimitReachedCard());
-
+  
+  const activeMentees = mentorships?.filter(m => m.status === 'active').slice(0, 3) || [];
+const mentorActiveContainer = document.querySelector('.scroll-container.active');
+if (mentorActiveContainer) {
+  let html = activeMentees.map(m => renderCard(m.mentee, null, false)).join('');
+  if (activeMentees.length < 3) {
+    for (let i = 0; i < 3 - activeMentees.length; i++) {
+      html += renderAddMenteeCard();
+    }
+  } else {
+    html += renderMenteeLimitReachedCard();
+  }
+  mentorActiveContainer.innerHTML = html;
+}
   document.querySelector('.scroll-container.pending').innerHTML =
     pendingMentees.map(m => renderCard(m.mentee, m.compatibility_score, true, m.id)).join('');
 
   // Mentee's mentors
   const { data: menteeMentorships } = await supabase
-    .from('mentorships')
-    .select(`id, mentor_id, application_id, status, compatibility_score, mentor:profiles!mentorships_mentor_id_fkey (id, name, designation, skills, learning_style, description)`)
-    .eq('mentee_id', user.id);
+  .from('mentorships')
+  .select(`id, mentor_id, application_id, status, compatibility_score, mentor:profiles!mentorships_mentor_id_fkey (id, name, designation, skills, learning_style, comm_mode, description)`)
+  .eq('mentee_id', user.id);
 
-  const myMentors = menteeMentorships?.filter(m => m.status === 'active').slice(0, 3) || [];
   const myPending = menteeMentorships?.filter(m => m.status === 'pending') || [];
 
-  const menteeActiveContainer = document.querySelector('.scroll-container.mentee-active');
+ const myMentors = menteeMentorships?.filter(m => m.status === 'active').slice(0, 3) || [];
+const menteeActiveContainer = document.querySelector('.scroll-container.mentee-active');
 if (menteeActiveContainer) {
-  menteeActiveContainer.innerHTML =
-    myMentors.map(m => renderCard({ ...m.mentor, application_id: m.application_id }, null, false, m.id, true)).join('') +
-    (myMentors.length < 3 ? renderAddMentorCard() : renderMentorLimitReachedCard());
+  let html = myMentors.map(m => renderCard({ ...m.mentor, application_id: m.application_id }, null, false, m.id, true)).join('');
+  if (myMentors.length < 3) {
+    // Add the correct number of placeholders
+    for (let i = 0; i < 3 - myMentors.length; i++) {
+      html += renderAddMentorCard();
+    }
+  } else {
+    html += renderMentorLimitReachedCard();
+  }
+  menteeActiveContainer.innerHTML = html;
 }
 
   const menteePendingContainer = document.querySelector('.scroll-container.mentee-pending');
@@ -2111,22 +2122,31 @@ async function dissolveMentor(mentorshipId, btn) {
 }
 
 function scrollToApplication(appId) {
+  // Scroll the applications section to the top of the viewport
+  const appSection = document.querySelector('.scroll-container.mentee-applications');
+  if (appSection) {
+    window.scrollTo({
+      top: appSection.getBoundingClientRect().top + window.scrollY,
+      behavior: 'smooth'
+    });
+  }
+
+  // Highlight the application card and scroll it into view within the section
   const appCard = document.querySelector(`.application-card[data-app-id="${appId}"]`);
   if (appCard) {
-    appCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    // Optionally highlight the card
     highlightSelectedApplication(appCard);
-    // Optionally show mentor recommendations for this application
-    const app = window._menteeApplications?.find(a => a.id == appId);
-    const mentorship = window._myMentorships?.find(m => m.application_id == appId && (m.status === 'active' || m.status === 'completed'));
-    if (app && mentorship) {
-      loadRecommendationsForApplication(app, [mentorship.mentor_id]);
-      const recSection = document.querySelector('.scroll-container.mentor-recommendations');
-      recSection.classList.remove('hidden');
-      recSection.style.display = '';
-    }
+    // Scroll the card into view within the container (horizontal scroll)
+    appCard.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  } else {
+    console.warn('No application card found for appId:', appId);
   }
+
+  // Highlight the application tab/filter (adjust selector as needed)
+  document.querySelectorAll('.btn-filter').forEach(b => b.classList.remove('active'));
+  const appTab = document.querySelector('.btn-filter[data-filter="all"]');
+  if (appTab) appTab.classList.add('active');
 }
+
 
 function handleWithdrawClick(btn) {
   // Get mentorshipId and appId from button attributes
