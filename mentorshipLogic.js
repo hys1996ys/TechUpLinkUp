@@ -961,29 +961,38 @@ async function loadMenteeApplications() {
   );
 
   // Determine decision
-  let decision = 'pending';
-  if (mentorship) {
-    if (mentorship.status === 'active') decision = 'accepted';
-    else if (mentorship.status === 'rejected') decision = 'rejected';
-    else if (mentorship.status === 'pending') decision = 'pending';
-  }
-
+  // Determine decision
 
     // Find mentorships for this application
-    const activeMentorship = myMentorships?.find(
-      m => m.application_id === app.id && m.status === 'active'
-    );
-
-    const completedMentorship = myMentorships?.find(
-  m => m.application_id === app.id && (m.status === 'active' || m.status === 'completed' || m.status === 'dissolved')
+const activeMentorship = myMentorships?.find(
+  m => m.application_id === app.id && m.status === 'active'
+);
+const pendingMentorship = myMentorships?.find(
+  m => m.application_id === app.id && m.status === 'pending'
+);
+const rejectedMentorship = myMentorships?.find(
+  m => m.application_id === app.id && m.status === 'rejected'
+);
+const completedMentorship = myMentorships?.find(
+  m => m.application_id === app.id && (m.status === 'completed' || m.status === 'dissolved')
 );
 
 // Add this:
+let decision = '';
 let statusText = 'Pending';
-if (app.status === 'completed' || completedMentorship?.status === 'completed') {
+
+if (completedMentorship) {
+  decision = 'accepted'; // or 'completed'
   statusText = 'Completed';
 } else if (activeMentorship) {
+  decision = 'accepted';
   statusText = 'Active';
+} else if (pendingMentorship) {
+  decision = 'pending';
+  statusText = 'Pending';
+} else if (rejectedMentorship) {
+  decision = 'rejected';
+  statusText = 'Rejected';
 }
 
     const hasMentorRequest = myMentorships?.some(
@@ -1057,49 +1066,89 @@ const actionBtns = (app.status === 'completed' || hasMentorRequest) ? `
 }
 
     // Active
-    if (activeMentorship) {
-      div.classList.add('active-mentor');
-      div.style.background = '#d1fae5';
-      div.style.border = '2px solid #10b981';
-      div.style.opacity = '1';
-      div.innerHTML = `
-        <div style="position:absolute;top:0.5rem;left:0.5rem;">
-          <i class="fa fa-lock" title="This application is locked because you have an active mentor." style="color:#059669;font-size:1.3rem;"></i>
-        </div>
-        ${actionBtns}
-        <strong>Learning Outcome:</strong> ${app.learning_outcome}<br>
-        <strong>Skills:</strong> ${app.skills?.join(', ')}<br>
-        <strong>Learning Styles:</strong> ${app.learning_style?.join(', ')}<br>
-        <strong>Communication Modes:</strong> ${app.comm_mode?.join(', ')}<br><br>
-        <small>Created: ${new Date(app.created_at).toLocaleString()}</small>
-        <small>Status: ${statusText}</small>
-          <button class="btn btn-primary full-width" onclick="scrollToApplication('${app.id}')">
-    <i class="fa fa-eye"></i> View Application
-  </button>
-     <!-- Add dissolve button below -->
+    // ...existing code...
+
+// Active
+if (activeMentorship) {
+  div.classList.add('active-mentor');
+  div.style.background = '#d1fae5';
+  div.style.border = '2px solid #10b981';
+  div.style.opacity = '1';
+  div.innerHTML = `
+    <div style="position:absolute;top:0.5rem;left:0.5rem;">
+      <i class="fa fa-lock" title="This application is locked because you have an active mentor." style="color:#059669;font-size:1.3rem;"></i>
+    </div>
+    ${actionBtns}
+    <strong>Learning Outcome:</strong> ${app.learning_outcome}<br>
+    <strong>Skills:</strong> ${app.skills?.join(', ')}<br>
+    <strong>Learning Styles:</strong> ${app.learning_style?.join(', ')}<br>
+    <strong>Communication Modes:</strong> ${app.comm_mode?.join(', ')}<br><br>
+    <small>Created: ${new Date(app.created_at).toLocaleString()}</small>
+    <small>Status: ${statusText}</small>
+    <button class="btn btn-primary full-width" onclick="scrollToApplication('${app.id}')">
+      <i class="fa fa-eye"></i> View Application
+    </button>
     <button class="btn btn-danger full-width" style="margin-top:0.5rem;" onclick="dissolveMentor('${activeMentorship.id}', this)">
       <i class="fa fa-unlink"></i> Dissolve Mentorship
     </button>
-
-      `;
-      div.addEventListener('click', () => {
-        highlightSelectedApplication(div);
-        const recSection = document.querySelector('.scroll-container.mentor-recommendations');
-        recSection.classList.remove('hidden');
-        recSection.style.display = '';
-        loadRecommendationsForApplication(app, [activeMentorship.mentor_id]);
-      });
-      active.push({ div, created_at: app.created_at });
-      return;
+  `;
+  div.addEventListener('click', () => {
+    highlightSelectedApplication(div);
+    const recSection = document.querySelector('.scroll-container.mentor-recommendations');
+    if (recSection) {
+      recSection.classList.remove('hidden');
+      recSection.style.display = '';
+      recSection.innerHTML = `
+  <div class="info" style="padding:1rem;">
+    <i class="fa fa-info-circle" style="color:#059669;font-size:1.5rem;"></i>
+    <div style="margin-top:0.5rem;">You already have an <b>active mentor</b> for this application.<br><br>
+    Please refer to your active mentors above.</div>
+  </div>
+`;
     }
-
-    // Rejected
-if (mentorship && mentorship.status === 'rejected') {
-  div.classList.add('inactive');
-  div.style.background = '#f3f4f6';
+  });
+  active.push({ div, created_at: app.created_at });
+  return;
+}
+  // Rejected
+// Pending (should take priority over rejected)
+if (pendingMentorship) {
+  // ... render pending card ...
+  div.className = 'application-card';
+  div.style.background = '#fff';
   div.style.border = '2px solid #e5e7eb';
-  div.style.opacity = '0.7';
-  div.style.filter = 'grayscale(0.7)';
+  div.style.opacity = '1';
+  div.innerHTML = `
+    ${actionBtns}
+    <strong>Learning Outcome:</strong> ${app.learning_outcome}<br>
+    <strong>Skills:</strong> ${app.skills?.join(', ')}<br>
+    <strong>Learning Styles:</strong> ${app.learning_style?.join(', ')}<br>
+    <strong>Communication Modes:</strong> ${app.comm_mode?.join(', ')}<br><br>
+    <small>Created: ${new Date(app.created_at).toLocaleString()}</small>
+    <small>Status: Pending</small>
+    <small>Decision: Pending</small>
+    <button class="btn btn-primary full-width" onclick="scrollToApplication('${app.id}')">
+      <i class="fa fa-eye"></i> View Application
+    </button>
+  `;
+  div.addEventListener('click', () => {
+    highlightSelectedApplication(div);
+    const recSection = document.querySelector('.scroll-container.mentor-recommendations');
+    recSection.classList.remove('hidden');
+    recSection.style.display = '';
+    loadRecommendationsForApplication(app);
+  });
+  pending.push({ div, created_at: app.created_at });
+  return;
+}
+
+// Rejected (only if no pending mentorship)
+if (rejectedMentorship) {
+  div.classList.add('inactive');
+  div.style.background = '#fef3c7'; // light orange background
+  div.style.border = '2px solid #f59e42'; // orange border
+  div.style.opacity = '1';
+  div.style.filter = ''; // remove grayscale
   div.innerHTML = `
     <div style="position:absolute;top:0.5rem;left:0.5rem;">
       <i class="fa fa-ban" title="This application is rejected." style="color:#9ca3af;font-size:1.3rem;"></i>
@@ -1112,22 +1161,17 @@ if (mentorship && mentorship.status === 'rejected') {
     <small>Created: ${new Date(app.created_at).toLocaleString()}</small>
     <small>Status: Rejected</small>
     <small>Decision: Rejected</small>
-    <button class="btn btn-primary full-width" onclick="scrollToApplication('${app.id}')">
-      <i class="fa fa-eye"></i> View Application
+    <button class="btn btn-info full-width" style="margin-top:0.5rem;" onclick="showMentorRecommendations('${app.id}');event.stopPropagation();">
+      <i class="fa fa-search"></i> Find New Mentor
     </button>
   `;
   div.addEventListener('click', () => {
     highlightSelectedApplication(div);
-    const recSection = document.querySelector('.scroll-container.mentor-recommendations');
-    recSection.classList.add('hidden');
-    recSection.style.display = 'none';
-    recSection.innerHTML = '';
+    showMentorRecommendations(app.id);
   });
   completed.push({ div, created_at: app.created_at });
   return;
-}
-
-    // Pending/normal
+}   // Pending/normal
     div.innerHTML = `
       ${actionBtns}
       <strong>Learning Outcome:</strong> ${app.learning_outcome}<br>
@@ -1431,3 +1475,15 @@ async function loadMentorApplications() {
     };
   });
 };
+
+function showMentorRecommendations(appId) {
+  const app = window._menteeApplications?.find(a => a.id == appId);
+  if (app) {
+    const recSection = document.querySelector('.scroll-container.mentor-recommendations');
+    if (recSection) {
+      recSection.classList.remove('hidden');
+      recSection.style.display = '';
+    }
+    loadRecommendationsForApplication(app);
+  }
+}
