@@ -1465,17 +1465,22 @@ document.getElementById('logoutBtn')?.addEventListener('click', async () => {
 
 async function setupGoogleMeet(menteeId, event) {
   event.stopPropagation();
-  // Optionally show a loading spinner or disable the button
+  const { data: session } = await supabase.auth.getSession();
+  const token = session?.session?.access_token;
+  if (!token) {
+    alert('Not authenticated. Please log in.');
+    return;
+  }
 
-  // Example: Call your backend endpoint to create a Google Meet
   try {
-    // Use absolute URL for local backend
     const response = await fetch('https://techuplinkup-backend.onrender.com/api/create-google-meet', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ menteeId }),
-  credentials: 'include'
-});
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`  // ✅ send token manually
+      },
+      body: JSON.stringify({ menteeId })
+    });
     const data = await response.json();
     if (data.meetLink) {
       window.open(data.meetLink, '_blank');
