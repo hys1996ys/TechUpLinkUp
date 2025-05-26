@@ -1038,3 +1038,66 @@ select[multiple] {
 .google-meet-btn:hover {
   color: #0b8043;
 }
+
+.challenge-section {
+  padding: 2rem;
+  background-color: #fff;
+  border-top: 1px solid #e5e7eb;
+}
+
+.challenge-section h2 {
+  text-align: center;
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+  color: #0f172a;
+}
+
+.challenge-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  justify-content: space-between;
+}
+
+.challenge-box {
+  flex: 1;
+  min-width: 300px;
+  border: 1px solid #f3f4f6;
+  border-radius: 8px;
+  padding: 1.5rem;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+}
+
+.challenge-box h3 {
+  color: #b91c1c;
+  margin-bottom: 1rem;
+}
+
+.challenge-box ul {
+  padding-left: 1.2rem;
+  margin-top: 0.5rem;
+}
+
+.challenge-box p {
+  margin-top: 1rem;
+  color: #374151;
+}
+
+.root-cause,
+.impact {
+  background: #fff;
+  border-left: 4px solid #ff9800;
+  padding: 1em 1.5em;
+  margin: 1.5em 0;
+  border-radius: 6px;
+  min-width: 320px;
+  min-height: 120px;
+  width: 100%;
+  box-sizing: border-box;
+  display: block;
+}
+
+
+/* Problem Statement */
+
