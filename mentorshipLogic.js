@@ -261,8 +261,7 @@ async function acceptMentee(mentorshipId, btn) {
     btn.classList.remove('btn-success');
     btn.classList.add('btn-secondary');
     loadMentorAndMenteeViews();
-     loadMenteeApplications();
-      loadMentorApplications();
+     loadMenteeApplications() && loadMentorApplications();
   }
 }
 
@@ -935,7 +934,6 @@ if (rejectedMentorship) {
     <strong>Communication Modes:</strong> ${app.comm_mode?.join(', ')}<br><br>
     <small>Created: ${new Date(app.created_at).toLocaleString()}</small>
     <small>Status: Rejected</small>
-    <small>Decision: Rejected</small>
     <button class="btn btn-primary full-width" style="margin-top:0.5rem;" onclick="showMentorRecommendations('${app.id}');event.stopPropagation();">
   <i class="fa fa-search"></i> Find New Mentor
 </button> 

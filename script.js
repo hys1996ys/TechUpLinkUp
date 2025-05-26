@@ -335,6 +335,17 @@ document.addEventListener('DOMContentLoaded', async () => {
           alert('Failed to update status: ' + error.message);
         }
       }
+
+      // After fetching the user's profile data
+if (!profile.accepting_applications) {
+  toggleBtn.classList.remove('active');
+  toggleBtn.textContent = 'Not accepting applications';
+  document.getElementById('applicationStatus')?.classList.add('hidden');
+} else {
+  toggleBtn.classList.add('active');
+  toggleBtn.textContent = 'Actively accepting applications';
+  document.getElementById('applicationStatus')?.classList.remove('hidden');
+}
     });
   }
 
