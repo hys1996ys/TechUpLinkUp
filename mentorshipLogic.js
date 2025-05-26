@@ -300,12 +300,9 @@ async function loadRecommendationsForApplication(app, mentorIds = null) {
 
   // Fetch mentors matching the application
   const { data: mentors, error } = await supabase
-    .from('profiles')
-    .select('*')
-    .overlaps('skills', app.skills)
-    .overlaps('learning_style', app.learning_style)
-    .overlaps('comm_mode', app.comm_mode);
-
+  .from('profiles')
+  .select('*')
+  .neq('id', user.id); // Exclude self
   // Fetch existing mentorships for this mentee
   const { data: myMentorships } = await supabase
     .from('mentorships')
