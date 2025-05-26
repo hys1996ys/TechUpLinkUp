@@ -1470,12 +1470,12 @@ async function setupGoogleMeet(menteeId, event) {
   // Example: Call your backend endpoint to create a Google Meet
   try {
     // Use absolute URL for local backend
-    const response = await fetch('http://localhost:5500/api/create-google-meet', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ menteeId }),
-      credentials: 'include' // Ensure cookies/session are sent
-    });
+    const response = await fetch('https://techuplinkup-backend.onrender.com/api/create-google-meet', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ menteeId }),
+  credentials: 'include'
+});
     const data = await response.json();
     if (data.meetLink) {
       window.open(data.meetLink, '_blank');
