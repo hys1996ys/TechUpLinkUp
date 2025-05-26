@@ -1463,17 +1463,18 @@ document.getElementById('logoutBtn')?.addEventListener('click', async () => {
 });
 
 
-
 async function setupGoogleMeet(menteeId, event) {
   event.stopPropagation();
   // Optionally show a loading spinner or disable the button
 
   // Example: Call your backend endpoint to create a Google Meet
   try {
-    const response = await fetch('/api/create-google-meet', {
+    // Use absolute URL for local backend
+    const response = await fetch('http://localhost:5500/api/create-google-meet', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ menteeId })
+      body: JSON.stringify({ menteeId }),
+      credentials: 'include' // Ensure cookies/session are sent
     });
     const data = await response.json();
     if (data.meetLink) {

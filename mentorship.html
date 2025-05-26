@@ -365,5 +365,32 @@ async function loadMentorAndMenteeViews() {
 
 <script src="mentorshipLogic.js"></script>
 
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const loginBtn = document.getElementById('googleLoginBtn');
+  const meetBtn = document.getElementById('createMeetBtn');
+
+  if (loginBtn) {
+    loginBtn.addEventListener('click', () => {
+      window.location.href = 'https://techuplinkup-backend.onrender.com/auth/google';
+    });
+  }
+
+  if (meetBtn) {
+    meetBtn.addEventListener('click', () => {
+      fetch('https://techuplinkup-backend.onrender.com/api/create-google-meet', {
+        method: 'POST',
+        credentials: 'include'
+      })
+      .then(res => res.json())
+      .then(data => {
+        alert('Google Meet link: ' + data.meetLink);
+      })
+      .catch(err => console.error('Error:', err));
+    });
+  }
+});
+</script>
+
 </body>
 </html>
