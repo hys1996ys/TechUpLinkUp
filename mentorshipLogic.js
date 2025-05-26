@@ -37,10 +37,19 @@ function renderCard(profile, score = null, isPending = false, mentorshipId = nul
        <button class="btn btn-danger full-width" onclick="rejectMentee('${mentorshipId}', this)">Reject</button>`
    : `<button class="btn btn-success full-width" onclick="scrollToApplication('${applicationId || profile.application_id || ''}')"><i class="fa fa-eye"></i> View Application</button>`;
   
+// --- Add Google Meet icon/button for mentor cards in mentee view ---
+  const googleMeetBtn = isMentor
+    ? `<div style="position:absolute;top:0.5rem;right:0.5rem;">
+        <button class="google-meet-btn" title="Set up Google Meet" onclick="setupGoogleMeet('${profile.id}', event)">
+          <i class="fa-solid fa-video"></i>
+        </button>
+      </div>`
+    : '';
 
 return `
   <div class="mentee-card" style="font-family:inherit;font-size:1rem;">
-    ${avatar}
+  ${googleMeetBtn}  
+  ${avatar}
     <h3 style="font-weight: bold; color: #007bff; margin: 0 0 0.5rem 0; font-family:inherit; font-size:1.1rem;">
       ${profile.name}
       ${profile.designation ? `<span style="font-weight:bold;color:#007bff;font-size:1rem; margin-left:0.5rem;">(${profile.designation})</span>` : ''}
@@ -238,35 +247,11 @@ if (menteeActiveContainer) {
   menteeActiveContainer.innerHTML = html;
 }
 
-  // Add Google Meet icon for mentor cards in mentee view
-  const googleMeetBtn = isMentor && mentorshipId
-    ? `<div style="position:absolute;top:0.5rem;right:0.5rem;">
-        <button class="google-meet-btn" title="Set up Google Meet" onclick="setupGoogleMeet('${mentorshipId}', event)">
-          <i class="fa-solid fa-video"></i>
-        </button>
-      </div>`
-    : '';
-
   const menteePendingContainer = document.querySelector('.scroll-container.mentee-pending');
 if (menteePendingContainer) {
   menteePendingContainer.innerHTML =
     myPending.map(m => renderCard(m.mentor, m.compatibility_score, true, m.id, true)).join('');
 }
-  return `
-    <div class="mentee-card" style="font-family:inherit;font-size:1rem; position:relative;">
-      ${avatar}
-      ${googleMeetBtn}
-      <h3 style="font-weight: bold; color: #007bff; margin: 0 0 0.5rem 0; font-family:inherit; font-size:1.1rem;">
-        ${profile.name}
-        ${profile.designation ? `<span style="font-weight:bold;color:#007bff;font-size:1rem; margin-left:0.5rem;">(${profile.designation})</span>` : ''}
-      </h3>
-      ${learningOutcome}
-      ${matchBar}
-      ${skills}
-      ${learningStyles}
-      ${commModes}
-      ${actionBtn}
-    </div>`;
 }
 
 // Accept/reject mentee requests (mentor side)
