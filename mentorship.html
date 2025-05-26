@@ -369,6 +369,24 @@ async function loadMentorAndMenteeViews() {
 document.addEventListener('DOMContentLoaded', () => {
   const loginBtn = document.getElementById('googleLoginBtn');
   const meetBtn = document.getElementById('createMeetBtn');
+  const meetContainer = document.getElementById('meetBtnContainer');
+
+  // Check Google OAuth authentication status
+  fetch('https://techuplinkup-backend.onrender.com/api/check-auth', {
+    credentials: 'include'
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (data.authenticated) {
+        // Show Meet button, hide login button
+        if (loginBtn) loginBtn.style.display = 'none';
+        if (meetBtn) meetBtn.style.display = 'inline-block';
+      } else {
+        // Show login button, hide Meet button
+        if (loginBtn) loginBtn.style.display = 'inline-block';
+        if (meetBtn) meetBtn.style.display = 'none';
+      }
+    });
 
   if (loginBtn) {
     loginBtn.addEventListener('click', () => {
