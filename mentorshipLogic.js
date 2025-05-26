@@ -874,7 +874,7 @@ if (activeMentorship) {
     <small>Created: ${new Date(app.created_at).toLocaleString()}</small>
     <small>Status: ${statusText}</small>
     <button class="btn btn-danger full-width" style="margin-top:0.5rem;" onclick="dissolveMentor('${activeMentorship.id}', this)">
-      <i class="fa fa-unlink"></i> Dissolve Mentorship
+      <i class="fa fa-unlink"></i> Complete Mentorship
     </button>
   `;
   div.addEventListener('click', () => {
@@ -1022,7 +1022,7 @@ async function discardApplication(appId, btn) {
 }
 
 async function dissolveMentor(mentorshipId, btn) {
-  const confirmed = confirm('Are you sure you want to dissolve this mentorship?');
+  const confirmed = confirm('Make sure that you have speak to your mentor/mentee before marking this as completed');
   if (!confirmed) return;
   btn.disabled = true;
 
@@ -1061,7 +1061,7 @@ async function dissolveMentor(mentorshipId, btn) {
       .eq('id', mentorship.application_id);
   }
 
-  alert('Mentorship dissolved.');
+  alert('Mentorship completed.');
   loadMentorAndMenteeViews();
   loadMenteeApplications();
   loadMentorApplications(); // <-- Ensure mentor view updates
@@ -1237,7 +1237,7 @@ async function loadMentorApplications() {
             <i class="fa fa-lock" title="This application is active." style="color:#059669;font-size:1.3rem;"></i>
            </div>
            <button class="btn btn-danger full-width" style="margin-top:0.5rem;" onclick="dissolveMentor('${m.id}', this)">
-             <i class="fa fa-unlink"></i> Dissolve Mentorship
+             <i class="fa fa-unlink"></i> Complete Mentorship
            </button>
            `
         : ''
