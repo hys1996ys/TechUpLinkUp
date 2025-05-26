@@ -242,7 +242,7 @@ if (menteeActiveContainer) {
   const googleMeetBtn = isMentor && mentorshipId
     ? `<div style="position:absolute;top:0.5rem;right:0.5rem;">
         <button class="google-meet-btn" title="Set up Google Meet" onclick="setupGoogleMeet('${mentorshipId}', event)">
-          <i class="fa-brands fa-google-meet"></i>
+          <i class="fa-solid fa-video"></i>
         </button>
       </div>`
     : '';
