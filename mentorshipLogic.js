@@ -302,6 +302,7 @@ async function loadRecommendationsForApplication(app, mentorIds = null) {
   const { data: mentors, error } = await supabase
   .from('profiles')
   .select('*')
+  .eq('accepting_applications', true)
   .neq('id', user.id); // Exclude self
   // Fetch existing mentorships for this mentee
   const { data: myMentorships } = await supabase
