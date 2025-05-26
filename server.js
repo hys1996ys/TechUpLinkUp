@@ -1,3 +1,7 @@
+app.get('/', (req, res) => {
+  res.send('Backend is up and running!');
+});
+
 const express = require('express');
 const session = require('cookie-session');
 const { google } = require('googleapis');
@@ -41,30 +45,9 @@ app.get('/auth/google/callback', async (req, res) => {
 });
 
 app.post('/api/create-google-meet', async (req, res) => {
-  if (!req.session.tokens) return res.status(401).send('Not authenticated');
-
-  oauth2Client.setCredentials(req.session.tokens);
-  const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
-
-  const event = {
-    summary: 'Mentorship Session',
-    start: { dateTime: new Date().toISOString() },
-    end: { dateTime: new Date(Date.now() + 30 * 60000).toISOString() },
-    conferenceData: {
-      createRequest: {
-        requestId: `meet-${Date.now()}`,
-        conferenceSolutionKey: { type: 'hangoutsMeet' },
-      },
-    },
-  };
-
-  const response = await calendar.events.insert({
-    calendarId: 'primary',
-    resource: event,
-    conferenceDataVersion: 1,
-  });
-
-  res.json({ meetLink: response.data.hangoutLink });
+  // Your Google Meet creation logic here
+  // For now, you can test with a dummy response:
+  res.json({ meetLink: 'https://meet.google.com/new' });
 });
 
 const PORT = process.env.PORT || 5500;
