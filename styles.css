@@ -1027,3 +1027,14 @@ select[multiple] {
   font-weight: normal !important;
 }
 
+.google-meet-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #34a853;
+  font-size: 1.4rem;
+  padding: 0;
+}
+.google-meet-btn:hover {
+  color: #0b8043;
+}

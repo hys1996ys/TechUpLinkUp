@@ -238,11 +238,35 @@ if (menteeActiveContainer) {
   menteeActiveContainer.innerHTML = html;
 }
 
+  // Add Google Meet icon for mentor cards in mentee view
+  const googleMeetBtn = isMentor && mentorshipId
+    ? `<div style="position:absolute;top:0.5rem;right:0.5rem;">
+        <button class="google-meet-btn" title="Set up Google Meet" onclick="setupGoogleMeet('${mentorshipId}', event)">
+          <i class="fa-brands fa-google-meet"></i>
+        </button>
+      </div>`
+    : '';
+
   const menteePendingContainer = document.querySelector('.scroll-container.mentee-pending');
 if (menteePendingContainer) {
   menteePendingContainer.innerHTML =
     myPending.map(m => renderCard(m.mentor, m.compatibility_score, true, m.id, true)).join('');
 }
+  return `
+    <div class="mentee-card" style="font-family:inherit;font-size:1rem; position:relative;">
+      ${avatar}
+      ${googleMeetBtn}
+      <h3 style="font-weight: bold; color: #007bff; margin: 0 0 0.5rem 0; font-family:inherit; font-size:1.1rem;">
+        ${profile.name}
+        ${profile.designation ? `<span style="font-weight:bold;color:#007bff;font-size:1rem; margin-left:0.5rem;">(${profile.designation})</span>` : ''}
+      </h3>
+      ${learningOutcome}
+      ${matchBar}
+      ${skills}
+      ${learningStyles}
+      ${commModes}
+      ${actionBtn}
+    </div>`;
 }
 
 // Accept/reject mentee requests (mentor side)
@@ -1452,3 +1476,27 @@ document.getElementById('logoutBtn')?.addEventListener('click', async () => {
   await supabase.auth.signOut();
   window.location.href = 'index.html';
 });
+
+
+
+async function setupGoogleMeet(menteeId, event) {
+  event.stopPropagation();
+  // Optionally show a loading spinner or disable the button
+
+  // Example: Call your backend endpoint to create a Google Meet
+  try {
+    const response = await fetch('/api/create-google-meet', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ menteeId })
+    });
+    const data = await response.json();
+    if (data.meetLink) {
+      window.open(data.meetLink, '_blank');
+    } else {
+      alert('Failed to create Google Meet link.');
+    }
+  } catch (err) {
+    alert('Error setting up Google Meet.');
+  }
+}
