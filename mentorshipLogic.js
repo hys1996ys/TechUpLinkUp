@@ -448,6 +448,21 @@ async function requestMentorship(appId, mentorId, btn, app) {
   const user = session?.session?.user;
   if (!user) return;
 
+   // --- Profile completeness check ---
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('name, designation')
+    .eq('id', user.id)
+    .single();
+
+  if (!profile?.name || !profile?.designation) {
+    alert('Please complete your profile with both your name and job title before submitting an application for mentorship.');
+    btn.disabled = false;
+    btn.textContent = 'Request Mentorship';
+    return;
+  }
+  // --- End profile check ---
+
   btn.disabled = true;
   btn.textContent = 'Sending...';
 
@@ -1460,6 +1475,12 @@ document.getElementById('logoutBtn')?.addEventListener('click', async () => {
   window.location.href = 'index.html';
 });
 
+async function setupGoogleMeetDemo(menteeId, event) {
+  event.stopPropagation();
+  // Instead of calling the backend, just open a hardcoded Google Meet link
+  const hardcodedMeetLink = "https://meet.google.com/rar-djmz-tpn";
+  window.open(hardcodedMeetLink, '_blank');
+}
 
 async function setupGoogleMeet(menteeId, event) {
   event.stopPropagation();
