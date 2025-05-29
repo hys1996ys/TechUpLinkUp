@@ -1098,6 +1098,24 @@ select[multiple] {
   display: block;
 }
 
+.btn-filter .count {
+  background: #2563eb;
+  color: #fff;
+  border-radius: 1em;
+  padding: 0.1em 0.7em;
+  font-size: 0.95em;
+  margin-left: 0.4em;
+  font-weight: 600;
+  vertical-align: middle;
+  display: inline-block;
+  min-width: 1.5em;
+  text-align: center;
+  transition: background 0.2s;
+}
+.btn-filter.active .count {
+  background: #1e40af;
+}
 
 /* Problem Statement */
+
 

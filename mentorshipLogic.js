@@ -448,15 +448,15 @@ async function requestMentorship(appId, mentorId, btn, app) {
   const user = session?.session?.user;
   if (!user) return;
 
-   // --- Profile completeness check ---
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('name, designation')
-    .eq('id', user.id)
-    .single();
-
-  // Block if name is 'Unknown' or missing, or designation (job title) is blank/missing
-  if (!profile?.name || profile.name.trim().toLowerCase() === 'unknown' || !profile?.designation || profile.designation.trim() === '') {
+  // Block if name is missing, blank, or 'Unknown', or if designation (job title) is blank/missing
+  if (
+    !profile?.name ||
+    profile.name.trim() === '' ||
+    profile.name.trim().toLowerCase() === 'unknown' ||
+     profile.name.trim().toLowerCase() === 'user' ||
+    !profile?.designation ||
+    profile.designation.trim() === ''
+  ) {
     alert('Please complete your profile with both your real name and job title before submitting an application for mentorship.');
     btn.disabled = false;
     btn.textContent = 'Request Mentorship';
@@ -781,6 +781,13 @@ const rejectedMentorship = myMentorships?.find(
 const completedMentorship = myMentorships?.find(
   m => m.application_id === app.id && (m.status === 'completed' || m.status === 'dissolved')
 );
+
+// Update filter counts
+document.querySelector('.btn-filter[data-filter="all"] .count').textContent = pending.length + active.length + completed.length;
+document.querySelector('.btn-filter[data-filter="pending"] .count').textContent = pending.length;
+document.querySelector('.btn-filter[data-filter="active"] .count').textContent = active.length;
+document.querySelector('.btn-filter[data-filter="completed"] .count').textContent = completed.length;
+document.querySelector('.btn-filter[data-filter="rejected"] .count').textContent = rejected.length;
 
 // Add this:
 let decision = '';
@@ -1270,7 +1277,16 @@ async function loadMentorApplications() {
       btn.classList.add('active');
       renderMentorApps(btn.dataset.filter);
     };
-  });
+  }
+
+  // Update filter counts
+document.querySelector('.btn-filter[data-filter="all"] .count').textContent = pending.length + active.length + completed.length;
+document.querySelector('.btn-filter[data-filter="pending"] .count').textContent = pending.length;
+document.querySelector('.btn-filter[data-filter="active"] .count').textContent = active.length;
+document.querySelector('.btn-filter[data-filter="completed"] .count').textContent = completed.length;
+document.querySelector('.btn-filter[data-filter="rejected"] .count').textContent = rejected.length;
+
+);
 };
 
 function showMentorRecommendations(appId, mentorId = null) {
