@@ -782,13 +782,6 @@ const completedMentorship = myMentorships?.find(
   m => m.application_id === app.id && (m.status === 'completed' || m.status === 'dissolved')
 );
 
-// Update filter counts
-document.querySelector('.btn-filter[data-filter="all"] .count').textContent = pending.length + active.length + completed.length;
-document.querySelector('.btn-filter[data-filter="pending"] .count').textContent = pending.length;
-document.querySelector('.btn-filter[data-filter="active"] .count').textContent = active.length;
-document.querySelector('.btn-filter[data-filter="completed"] .count').textContent = completed.length;
-document.querySelector('.btn-filter[data-filter="rejected"] .count').textContent = rejected.length;
-
 // Add this:
 let decision = '';
 let statusText = 'Pending';
@@ -1278,14 +1271,6 @@ async function loadMentorApplications() {
       renderMentorApps(btn.dataset.filter);
     };
   }
-
-  // Update filter counts
-document.querySelector('.btn-filter[data-filter="all"] .count').textContent = pending.length + active.length + completed.length;
-document.querySelector('.btn-filter[data-filter="pending"] .count').textContent = pending.length;
-document.querySelector('.btn-filter[data-filter="active"] .count').textContent = active.length;
-document.querySelector('.btn-filter[data-filter="completed"] .count').textContent = completed.length;
-document.querySelector('.btn-filter[data-filter="rejected"] .count').textContent = rejected.length;
-
 );
 };
 
