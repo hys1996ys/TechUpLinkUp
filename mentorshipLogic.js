@@ -455,8 +455,9 @@ async function requestMentorship(appId, mentorId, btn, app) {
     .eq('id', user.id)
     .single();
 
-  if (!profile?.name || !profile?.designation) {
-    alert('Please complete your profile with both your name and job title before submitting an application for mentorship.');
+  // Block if name is 'Unknown' or missing, or designation (job title) is blank/missing
+  if (!profile?.name || profile.name.trim().toLowerCase() === 'unknown' || !profile?.designation || profile.designation.trim() === '') {
+    alert('Please complete your profile with both your real name and job title before submitting an application for mentorship.');
     btn.disabled = false;
     btn.textContent = 'Request Mentorship';
     return;
